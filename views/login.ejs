@@ -1,0 +1,22 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+
+  <body>
+    <main class="container">
+      <div class="form-box">
+        <form class="form" action="/sign-in" method="post">
+          <label for="username">Username</label>
+          <input type="text" id="username" value="<%= username %>" name="username">
+          <label for="password">Password:</label>
+          <input type="password" id="password" value="<%= password %>" name="password">
+          <%- include('./partials/errors.ejs', {errors: errors})%>
+            <div class="flex-center">
+              <button type="submit">Submit</button>
+            </div>
+        </form>
+        <h3> Don't have an account yet? <a href="/register" class="link">Sign up</a></h3>
+      </div>
+    </main>
+  </body>
+
+</html>
