@@ -15,10 +15,12 @@
 </script>
 
 <div class="page-container">
-	<h2>{title}</h2>
-	<p>Or <a href={alternativeLink.href}>{alternativeLink.text}</a></p>
-	<form method="POST">
-		{@render children()}
-		<button type="submit">{submitText}</button>
-	</form>
+	<main class="auth-main">
+		<h1>{title}</h1>
+		<p>Or <a href={alternativeLink.href}>{alternativeLink.text}</a></p>
+		<form class="auth-form" method="POST">
+			{@render children()}
+			<button class="auth-button" type="submit">{submitText}</button>
+		</form>
+	</main>
 </div>
