@@ -1,8 +1,16 @@
 <script lang="ts">
+  import ToggleTheme from "./ToggleTheme.svelte";
 	import { authClient } from "$lib/auth-client";
 	import { goto } from "$app/navigation";
+	import { fromStore } from "svelte/store";
 
-	const session = authClient.useSession(); 
+	interface Props {
+    user?: { name: string; role: string } | null;
+  }
+	let { user = null }: Props = $props();
+
+	const sessionStore = authClient.useSession();
+	const session = fromStore(sessionStore); 
 
 	let isLogOut = $state(false);
 
@@ -30,7 +38,8 @@
 			<a href="/" class="logo"><h1>File Uploader</h1></a>
 		</div>
 		<div class="other">
-			{#if $session.data?.user}
+			{#if session.current?.data?.user}
+				<ToggleTheme>Theme</ToggleTheme>
 				<button class="logout-button" onclick={handleLogOut} disabled={isLogOut}>
 				{isLogOut ? "Logging out..." : "Log Out"}</button>
 			{:else}
@@ -54,7 +63,7 @@
 
 	nav a{
 		text-decoration: none;
-		color: black;
+		color: currentColor;
 	}
 
 	nav h1{
@@ -72,7 +81,7 @@
 		padding: 12px;
 		font-weight: bold;
 		text-decoration: none;
-		color: black
+		color: currentColor;
 	}
 
 	.other a.get-started {
@@ -95,6 +104,15 @@
 	.logout-button {
 		padding: 12px;
 		font-weight: bold;
+	}
+
+	:global(body) {
+		transition: background-color 0.3s ease, color 0.3s ease; 
+	}
+
+	:global(body.dark-mode) {
+		background-color: oklch(21% 0.034 264.665);
+		color: oklch(87.2% 0.01 258.338);
 	}
 </style>
 
