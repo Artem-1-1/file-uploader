@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
+	import Button from "../ui/Button.svelte";
 
 	type AuthFormProps = {
 		title: string;
@@ -24,9 +25,9 @@
 	<main class="auth-main">
 		<h1>{title}</h1>
 		<p>Or <a href={alternativeLink.href}>{alternativeLink.text}</a></p>
-		<form class="auth-form" onsubmit={(e) => onSubmit?.(e)}>
+		<form class="auth-form" onsubmit={onSubmit}>
 			{@render children()}
-			<button class="auth-button" type="submit" disabled={isSubmitting}>{submitText}</button>
+			<Button type="submit" variant="primary" class="primary" disabled={isSubmitting}>{submitText}</Button>
 		</form>
 	</main>
 </div>

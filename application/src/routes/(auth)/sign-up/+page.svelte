@@ -1,5 +1,5 @@
 <script lang="ts">
-  import AuthForm from "$lib/components/AuthForm.svelte";
+  import AuthForm from "$lib/components/auth/AuthForm.svelte";
 	import { authClient } from "$lib/auth-client";
 	import { goto } from "$app/navigation";
 	import "$lib/styles/global.css";

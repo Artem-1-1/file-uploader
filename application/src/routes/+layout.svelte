@@ -1,16 +1,13 @@
 <script lang="ts">
-	import NavBar from '$lib/components/NavBar.svelte';
+	import NavBar from '$lib/components/layout/NavBar.svelte';
 	import favicon from '$lib/assets/favicon.svg';
-	let { children, data } : {
-		children: () => any;
-		data: { user: { name: string; role: string } | null }
-	} = $props();
+	let { children, data } = $props();
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<NavBar user={data.user} />
+<NavBar />
 
 {@render children()}

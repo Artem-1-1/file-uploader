@@ -1,13 +1,10 @@
 <script lang="ts">
   import ToggleTheme from "./ToggleTheme.svelte";
+	import Button from "../ui/Button.svelte";
 	import { authClient } from "$lib/auth-client";
 	import { goto } from "$app/navigation";
 	import { fromStore } from "svelte/store";
-
-	interface Props {
-    user?: { name: string; role: string } | null;
-  }
-	let { user = null }: Props = $props();
+	import "$lib/styles/global.css"
 
 	const sessionStore = authClient.useSession();
 	const session = fromStore(sessionStore); 
@@ -39,12 +36,13 @@
 		</div>
 		<div class="other">
 			{#if session.current?.data?.user}
-				<ToggleTheme>Theme</ToggleTheme>
-				<button class="logout-button" onclick={handleLogOut} disabled={isLogOut}>
-				{isLogOut ? "Logging out..." : "Log Out"}</button>
+				<ToggleTheme/>
+				<Button variant="primary" class="logout-button" onclick={handleLogOut} disabled={isLogOut}>
+				{isLogOut ? "Logging out..." : "Log Out"}
+				</Button>
 			{:else}
-				<a href="/sign-in">Sign in</a>
-				<a class="get-started" href="/sign-up">Get started</a>
+				<Button href="/sign-in" variant="secondary">Sign in</Button>
+				<Button href="/sign-up" variant="primary">Get started</Button>
 			{/if}
 		</div>
 	</nav>
@@ -75,44 +73,6 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: 1rem;
-	}
-
-	.other a{
-		padding: 12px;
-		font-weight: bold;
-		text-decoration: none;
-		color: currentColor;
-	}
-
-	.other a.get-started {
-		color: white;
-		background-color: #21A0A0;
-		border-radius: 8px;
-		box-shadow: 0 4px 6px rgba(33, 160, 160, 0.3);
-		transition: all 0.3s ease;
-	}
-
-	.other a:not(.get-started):hover {
-		text-decoration: underline;
-	}
-
-	.other a.get-started:hover {
-		background-color: #1B8585;
-		box-shadow: 0 6px 12px rgba(33, 160, 160, 0.4); 
-	}
-
-	.logout-button {
-		padding: 12px;
-		font-weight: bold;
-	}
-
-	:global(body) {
-		transition: background-color 0.3s ease, color 0.3s ease; 
-	}
-
-	:global(body.dark-mode) {
-		background-color: oklch(21% 0.034 264.665);
-		color: oklch(87.2% 0.01 258.338);
 	}
 </style>
 

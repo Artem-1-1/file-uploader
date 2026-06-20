@@ -2,6 +2,7 @@
 	--light-green: #21A0A0;
 	--light-green-hover: #1B8585;
 	--border-color: #dadce0;
+	--text-color: oklch(37.3% 0.034 259.733);
 }
 
 * {
@@ -12,7 +13,14 @@
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	line-height: 1.5;
+	color: var(--text-color);
+	transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+body.dark-mode {
+	background-color: oklch(21% 0.034 264.665);
+	color: oklch(92.8% 0.006 264.531);
+	}
 
 .auth-main {
 	margin: 0 auto;
