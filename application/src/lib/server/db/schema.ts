@@ -1,5 +1,5 @@
-import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { relations, isNull, isNotNull } from "drizzle-orm";
+import { pgTable, text, timestamp, bigint, boolean, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -16,6 +16,8 @@ export const user = pgTable("user", {
   banned: boolean("banned").default(false),
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires"),
+  storageUsed: bigint("storage_used", { mode: "number"}).default(0).notNull(),
+  storageLimit: bigint("storage_limit", { mode: "number"}).default(1073741824).notNull(),
 });
 
 export const session = pgTable(
@@ -78,9 +80,40 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const file = pgTable(
+  "file",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => user.id, {onDelete: "cascade"}),
+    parentId: text("parent_id").references((): any => file.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    type: text("type").notNull(),
+    size: bigint("size", {mode: "number"}).default(0).notNull(),
+    mimeType: text("mime_type"),
+    storagePath: text("storage_path"),
+    checksum: text("checksum"),
+    createdAt : timestamp("created_at").defaultNow().notNull(),
+    updateAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()).notNull(),
+    deletedAt: timestamp("deleted_at")
+  },
+  (table) => [
+    index("file_userId_idx").on(table.userId),
+    index("file_parentId_idx").on(table.parentId),
+
+    uniqueIndex("file_user_parent_name_idx")
+    .on(table.userId, table.parentId, table.name)
+    .where(isNotNull(table.parentId)),
+
+    uniqueIndex("file_user_root_name_idx")
+    .on(table.userId, table.name)
+    .where(isNull(table.parentId)),
+  ]
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  files: many(file),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -95,4 +128,14 @@ export const accountRelations = relations(account, ({ one }) => ({
     fields: [account.userId],
     references: [user.id],
   }),
+}));
+
+export const fileRelations = relations(file, ({ one, many }) => ({
+  user: one(user, { fields: [file.userId], references: [user.id] }),
+  parent: one(file, {
+    fields: [file.parentId],
+    references: [file.id],
+    relationName: "file_hierarchy", 
+  }),
+  children: many(file, { relationName: "file_hierarchy" }),
 }));

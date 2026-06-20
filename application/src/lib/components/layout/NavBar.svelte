@@ -3,11 +3,9 @@
 	import Button from "../ui/Button.svelte";
 	import { authClient } from "$lib/auth-client";
 	import { goto } from "$app/navigation";
-	import { fromStore } from "svelte/store";
 	import "$lib/styles/global.css"
 
-	const sessionStore = authClient.useSession();
-	const session = fromStore(sessionStore); 
+	let { user } = $props<{ user: any }>();
 
 	let isLogOut = $state(false);
 
@@ -35,7 +33,7 @@
 			<a href="/" class="logo"><h1>File Uploader</h1></a>
 		</div>
 		<div class="other">
-			{#if session.current?.data?.user}
+			{#if user}
 				<ToggleTheme/>
 				<Button variant="primary" class="logout-button" onclick={handleLogOut} disabled={isLogOut}>
 				{isLogOut ? "Logging out..." : "Log Out"}
