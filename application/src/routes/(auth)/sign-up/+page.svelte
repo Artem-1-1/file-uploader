@@ -1,7 +1,7 @@
 <script lang="ts">
   import AuthForm from "$lib/components/auth/AuthForm.svelte";
 	import { authClient } from "$lib/auth-client";
-	import { goto } from "$app/navigation";
+	import { goto, invalidateAll } from "$app/navigation";
 	import "$lib/styles/global.css";
 
 	let errorMessage = $state("");
@@ -20,6 +20,7 @@
 
 		if (password !== passwordConf) {
       errorMessage = "Passwords do not match!";
+			isSubmitting = false;
       return;
     }
 
@@ -27,20 +28,25 @@
     isSubmitting = true;
 
 		try {
-			const { data, error } = await authClient.signUp.email({
+			await authClient.signUp.email({
 				email,
 				password,
-				name
+				name, 
+				fetchOptions: {
+					onError: (ctx) => {
+						console.error("Sign up error:", ctx.error);
+            errorMessage = ctx.error.message || "Failed to create account.";
+            isSubmitting = false;
+					}, 
+					onSuccess: async() => {
+						await invalidateAll();
+						await goto("/sign-in")
+					}
+				}
 			});
-
-			if (error) {
-				console.error("Sign up error:", error);
-				errorMessage = error.message || "Failed to create account.";
-			} else {
-				goto("/")
-			}
 		} catch (error) {
-			errorMessage = "An unexpected error occurred."
+			errorMessage = "An unexpected error occurred.";
+			isSubmitting = false;
 		}
 	}
 </script>

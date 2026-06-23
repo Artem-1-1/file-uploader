@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AuthForm from "$lib/components/auth/AuthForm.svelte";
 	import { authClient } from "$lib/auth-client";
-	import { goto } from "$app/navigation";
+	import { goto, invalidateAll } from "$app/navigation";
 	import "$lib/styles/global.css";
 
 	let errorMessage = $state("");
@@ -20,17 +20,22 @@
 		isSubmitting = true;
 
 		try {
-			const { data, error } = await authClient.signIn.email({
+			await authClient.signIn.email({
 				email,
-				password
+				password, 
+			  fetchOptions: {
+					onError: (ctx) => {
+						console.error("Sign in error:", ctx.error);
+						errorMessage = ctx.error.message || "Invalid email or password.";
+						isSubmitting = false;
+					},
+					onSuccess: async() => {
+						await invalidateAll();
+						await goto("/")
+						isSubmitting = false;
+					}
+				}
 			});
-			if (error) {
-				console.error("Sign in error:", error);
-				errorMessage = error.message || "Invalid email or password.";
-				isSubmitting = false;
-			} else {
-				goto("/"); 
-			}
 		} catch (error) {
 			errorMessage = "An unexpected error occurred.";
 			isSubmitting = false;

@@ -4,26 +4,30 @@
 
   type BaseProps = {
     children: Snippet,
-    variant: 'primary' | 'secondary';
-    class?: String;
+    variant?: 'primary' | 'secondary';
+    class?: string;
   }
 
-  type AnchorProps = BaseProps & HTMLAnchorAttributes & { href: string };
-  type ButtonProps = BaseProps & HTMLButtonAttributes & { href?: never };
+  type ComponentProps = BaseProps & (
+    | (Omit<HTMLAnchorAttributes, 'class' | 'type'> & { href: string, type?: never })
+    | (Omit<HTMLButtonAttributes, 'class'> & { href?: never })
+  );
 
   let {
     children,
     variant = 'primary',
     class: className = '',
-    type = 'button' as 'button' | 'submit' | 'reset',
+		href,
+    type = 'button',
     ...restProps
-  } : AnchorProps | ButtonProps = $props();
+  } : ComponentProps = $props();
 </script>
 
-{#if 'href' in restProps && restProps.href}
+{#if href}
 	<a 
+		{href}
 		class="btn btn-{variant} {className}" 
-		{...restProps}
+		{...(restProps as HTMLAnchorAttributes)}
 	>
 		{@render children()}
 	</a>
@@ -31,7 +35,7 @@
 	<button 
 		{type}
 		class="btn btn-{variant} {className}" 
-		{...restProps}
+		{...(restProps as HTMLButtonAttributes)}
 	>
 		{@render children()}
 	</button>
@@ -42,7 +46,7 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 12px;
+		padding: 12px 16px;
 		border: none;
 		border-radius: 8px;
 		font-size: 16px;
