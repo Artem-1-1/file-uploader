@@ -18,12 +18,12 @@
 		"auth:schema": "better-auth generate --config src/lib/server/auth.ts --output src/lib/server/db/auth.schema.ts --yes"
 	},
 	"devDependencies": {
-		"@better-auth/cli": "~1.4.21",
+		"@better-auth/cli": "^1.4.21",
 		"@sveltejs/adapter-auto": "^7.0.1",
-		"@sveltejs/kit": "^2.63.0",
+		"@sveltejs/kit": "^2.67.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@types/node": "^24",
-		"better-auth": "~1.4.21",
+		"better-auth": "^1.6.20",
 		"drizzle-kit": "^0.31.10",
 		"drizzle-orm": "^0.45.2",
 		"postgres": "^3.4.9",
@@ -31,5 +31,17 @@
 		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",
 		"vite": "^8.0.16"
+	},
+	"dependencies": {
+		"@uploadthing/svelte": "^7.3.3",
+		"uploadthing": "^7.7.4"
+	},
+	"overrides": {
+		"cookie": "^0.7.0",
+		"effect": "^3.20.0",
+		"esbuild": "^0.25.0",
+		"drizzle-orm": "^0.45.2",
+		"lodash": "^4.18.0",
+		"@better-auth/core": "^1.6.20" 
 	}
 }
