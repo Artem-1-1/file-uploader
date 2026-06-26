@@ -12,27 +12,28 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	}
 
 	const pathname = event.url.pathname;
-
-	const publicRoutes = ['/', '/sign-up', '/sign-in'];
 	const isAuthApi = pathname.startsWith('/api/auth');
-	const isPublicRoute = publicRoutes.includes(pathname) || isAuthApi;
+	const isUploadthingApi = pathname.startsWith('/api/uploadthing');
 
-	if (!isPublicRoute && !event.locals.user) {
-		throw redirect(303, '/sign-in');
+	const authPages = ['/sign-in', '/sign-up']
+	if( event.locals.user && authPages.includes(pathname)) {
+		throw redirect(303, '/home');
 	}
 
 	if (pathname.startsWith('/admin')) {
 		if (!event.locals.user) {
 			throw redirect(303, '/sign-in');
 		}
-
 		if (event.locals.user.role !== 'admin') {
-			throw redirect(303, '/'); 
+			throw redirect(303, '/home');
 		}
 	}
+	
+	const publicRoutes = ['/', '/sign-up', '/sign-in'];
+	const isPublicRoute = publicRoutes.includes(pathname) || isAuthApi || isUploadthingApi;;
 
-	if (event.locals.user && (pathname === '/sign-in' || pathname === '/sign-up')) {
-		throw redirect(303, '/dashboard'); 
+	if (!isPublicRoute && !event.locals.user) {
+		throw redirect(303, '/sign-in');
 	}
 
 	return svelteKitHandler({ event, resolve, auth, building });

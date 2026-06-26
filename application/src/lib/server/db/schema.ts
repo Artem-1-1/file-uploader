@@ -1,4 +1,4 @@
-import { relations, sql, isNull, isNotNull, and } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { pgTable, text, timestamp, bigint, boolean, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -83,7 +83,7 @@ export const verification = pgTable(
 export const file = pgTable(
   "file",
   {
-    id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+    id: text("id").primaryKey().default(sql`gen_random_uuid()::text`),
     userId: text("user_id").notNull().references(() => user.id, {onDelete: "cascade"}),
     parentId: text("parent_id").references((): any => file.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
@@ -102,11 +102,11 @@ export const file = pgTable(
 
     uniqueIndex("file_user_parent_name_idx")
       .on(table.userId, table.parentId, table.name)
-      .where(sql`${isNotNull(table.parentId)} AND ${isNull(table.deletedAt)}`),
+      .where(sql`${table.parentId} IS NOT NULL AND ${table.deletedAt} IS NULL`),
 
     uniqueIndex("file_user_root_name_idx")
       .on(table.userId, table.name)
-      .where(sql`${isNull(table.parentId)} AND ${isNull(table.deletedAt)}`),
+      .where(sql`${table.parentId} IS NULL AND ${table.deletedAt} IS NULL`),
   ]
 );
 

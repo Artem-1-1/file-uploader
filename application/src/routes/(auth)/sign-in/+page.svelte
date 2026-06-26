@@ -31,7 +31,7 @@
 					},
 					onSuccess: async() => {
 						await invalidateAll();
-						await goto("/")
+						await goto("/home")
 						isSubmitting = false;
 					}
 				}
