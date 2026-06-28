@@ -1,60 +1,28 @@
 <script lang="ts">
 	import AuthForm from "$lib/components/auth/AuthForm.svelte";
-	import { authClient } from "$lib/auth-client";
-	import { goto, invalidateAll } from "$app/navigation";
+	import type { PageProps } from './$types';
+	import { page } from "$app/state";
 	import "$lib/styles/global.css";
 
-	let errorMessage = $state("");
 	let isSubmitting = $state(false);
+	let { form }: PageProps = $props();
 
-	async function handleSignIn(e : SubmitEvent) {
-		e.preventDefault();
-
-		const form = e.target as HTMLFormElement;
-		const formData = new FormData(form);
-
-		const email = formData.get("email") as string;
-		const password = formData.get("password") as string;
-
-		errorMessage = "";
-		isSubmitting = true;
-
-		try {
-			await authClient.signIn.email({
-				email,
-				password, 
-			  fetchOptions: {
-					onError: (ctx) => {
-						console.error("Sign in error:", ctx.error);
-						errorMessage = ctx.error.message || "Invalid email or password.";
-						isSubmitting = false;
-					},
-					onSuccess: async() => {
-						await invalidateAll();
-						await goto("/home")
-						isSubmitting = false;
-					}
-				}
-			});
-		} catch (error) {
-			errorMessage = "An unexpected error occurred.";
-			isSubmitting = false;
-		}
-	}
+	let successMessage = $derived(
+    page.url.searchParams.get('message') === 'password_reset_success' 
+      ? 'Password has been successfully reset.' 
+      : ''
+  );
 </script>
 
 <AuthForm
   title="Sign in to your account"
 	submitText="Sign in"
 	alternativeLink={{text: "sign up for a new account", href: "/sign-up"}}
-	onSubmit={handleSignIn}
-	isSubmitting={isSubmitting}
+	bind:isSubmitting={isSubmitting}
 >
-	{#if errorMessage}
-		<div class="form-error">
-			{errorMessage}
-		</div>
-	{/if}
+	{#if successMessage}<div class="form-success">{successMessage}</div>{/if}
+  {#if form?.error}<div class="form-error">{form.error}</div>{/if}
+
 	<div class="form-group">
 		<label for="email">Email</label>
 		<input id="email" name="email" type="email" placeholder="Enter your email" required>
@@ -63,4 +31,5 @@
 		<label for="password">Password</label>
 		<input id="password" name="password" type="password" placeholder="Enter your password" required>
 	</div>
+	<a href="/users/forgot-password" class="forgot-link">Forgot password?</a>
 </AuthForm>

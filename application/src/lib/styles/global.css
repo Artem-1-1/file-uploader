@@ -103,5 +103,9 @@ body.dark-mode {
 	background-color: var(--light-green-hover);
 }
 
+.forgot-link {
+	text-align: end;
+}
+
 
 

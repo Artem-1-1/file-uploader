@@ -29,7 +29,7 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 		}
 	}
 	
-	const publicRoutes = ['/', '/sign-up', '/sign-in'];
+	const publicRoutes = ['/', '/sign-up', '/sign-in', '/users/forgot-password', '/users/reset-password'];
 	const isPublicRoute = publicRoutes.includes(pathname) || isAuthApi || isUploadthingApi;;
 
 	if (!isPublicRoute && !event.locals.user) {
