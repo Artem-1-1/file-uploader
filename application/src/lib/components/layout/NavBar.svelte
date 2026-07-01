@@ -62,6 +62,7 @@
 						<div class="user-email">{user.email}</div>
 					</div>
 					<hr />
+					<a href="/account">Settings</a>
 					<Button variant="primary" class="logout-button" onclick={handleLogOut} disabled={isLogOut}>
 						{isLogOut ? "Logging out..." : "Log Out"}
 					</Button>
