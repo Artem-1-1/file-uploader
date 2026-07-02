@@ -1,10 +1,13 @@
-import { createUploadthing, type FileRouter } from "uploadthing/server";
+import { createUploadthing, type FileRouter, UTApi } from "uploadthing/server";
 import { UploadThingError } from "uploadthing/server";
 import { z } from "zod";
 import { eq, and, isNull, sql } from "drizzle-orm";
 import { db } from "$lib/server/db";
 import { file, user } from "$lib/server/db/schema";
 import { auth } from "./auth";
+import { UPLOADTHING_TOKEN } from "$env/static/private";
+
+export const utapi = new UTApi({ token: UPLOADTHING_TOKEN });
 
 const f = createUploadthing();
 
@@ -79,7 +82,7 @@ export  const ourFileRouter = {
       storagePath: uploadFile.key,
     }).returning();
 
-    return { fileId: newFile.id, url: uploadFile.url};
+    return { fileId: newFile.id, url: uploadFile.ufsUrl};
   }),
 } satisfies FileRouter;
 

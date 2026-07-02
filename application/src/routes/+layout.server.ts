@@ -1,12 +1,20 @@
 import type { LayoutServerLoad } from "./$types";
+import { getUserById } from "$lib/server/users";
 
-export const load: LayoutServerLoad = async(event) => {
+export const load: LayoutServerLoad = async ({ locals }) => {
+  if (!locals.user?.id) {
+    return { user: null };
+  }
+
+  const freshUser = await getUserById(locals.user.id);
+
   return {
-    user: event.locals.user ? {
-      id: event.locals.user.id,
-      name: event.locals.user.name,
-      email: event.locals.user.email,
-      role: event.locals.user.role,
+    user: freshUser ? {
+      id: freshUser.id,
+      name: freshUser.name,
+      email: freshUser.email,
+      image: freshUser.image,
+      role: freshUser.role,
     } : null
   };
 };

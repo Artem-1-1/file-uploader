@@ -9,7 +9,7 @@
       {@render children()}
       <div class="modal-actions">
         <button onclick={onCancel}>Cancel</button>
-        <button onclick={onConfirm}>Change username</button>
+        <button onclick={onConfirm}>Confirm</button>
       </div>
     </div>
   </div>

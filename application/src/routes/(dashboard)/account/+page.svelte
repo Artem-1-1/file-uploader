@@ -2,12 +2,22 @@
   import Avatar from "$lib/components/ui/Avatar.svelte";
   import Modal from "$lib/components/ui/Modal.svelte";
   import { page } from "$app/state";
+  import { enhance } from "$app/forms";;
+
   const user = $derived(page.data.user);
 
-  let isModalOpen = $state(false);
+  let isUsernameModalOpen = $state(false);
+  let isEmailModalOpen = $state(false);
+  let isUploading = $state(false);
+
+  let newUsername = $state('');
+  let newEmail = $state('');
 
   function handleCancel() {
-    isModalOpen = false;
+    isUsernameModalOpen = false;
+    isEmailModalOpen = false;
+    newUsername = user.name;
+    newEmail = user.email;
   }
   const handleConfirm = '';
 </script>
@@ -22,11 +32,24 @@
     <div class="account-page-module">
       <h3 class="module-left">Photo</h3>
       <div class="module-right">
-        <Avatar/>
+        <Avatar src={user.image}/>
+        <form 
+          method="POST" 
+          action="?/updateAvatar" 
+          enctype="multipart/form-data"
+          use:enhance={() => {
+            isUploading = true;
+            return async ({ update }) => {
+              await update();
+              isUploading = false;
+            };
+          }}
+        >
         <label class="custom-upload">
-          <input type="file" accept="image/*">
+          <input type="file" id="avatar" name="avatar" accept="image/*" onchange={(e) => e.currentTarget.form?.requestSubmit()}>
           Change
         </label>
+        </form>
       </div>
     </div>
 
@@ -34,16 +57,16 @@
       <h3 class="module-left">Username</h3>
       <div class="module-right">
         {user.name}
-        {#if isModalOpen}
+        {#if isUsernameModalOpen}
           <Modal 
             title="Change your username"
-            bind:isOpen={isModalOpen}
+            bind:isOpen={isUsernameModalOpen}
             onConfirm={handleConfirm}
             onCancel={handleCancel}>
-            <input type="text" bind:value={user.name}>
+            <input type="text" class="modal-input" bind:value={newUsername}>
           </Modal>
         {/if}   
-        <button class="change-btn" onclick={() => isModalOpen = true}>Change</button>
+        <button class="change-btn" onclick={() => isUsernameModalOpen = true}>Change</button>
       </div>
     </div>
 
@@ -51,19 +74,18 @@
       <h3 class="module-left">Personal email address</h3>
       <div class="module-right">
         {user.email}
-        {#if isModalOpen}
+        {#if isEmailModalOpen}
         <Modal 
-            title="Change your email"
-            bind:isOpen={isModalOpen}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}>
-            <input type="email" bind:value={user.email}>
-          </Modal>
+          title="Change your email"
+          bind:isOpen={isEmailModalOpen}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}>
+          <input type="email" class="modal-input" bind:value={newEmail}>
+        </Modal>
         {/if} 
-        <button class="change-btn" onclick={() => isModalOpen = true}>Change</button>
+        <button class="change-btn" onclick={() => isEmailModalOpen = true}>Change</button>
       </div>
     </div>
-
   </div>
 </div>
 
