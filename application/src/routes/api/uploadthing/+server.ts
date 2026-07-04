@@ -1,11 +1,11 @@
-import { env } from "$env/dynamic/private";
-import { ourFileRouter } from "$lib/server/uploadthing";
+import { UPLOADTHING_TOKEN } from "$env/static/private";
+import { OurFileRouter } from "$lib/server/uploadthing";
 import { createRouteHandler } from "uploadthing/server";
 
 const handler = createRouteHandler({
-  router: ourFileRouter,
+  router: OurFileRouter,
   config: {
-    token: env.UPLOADTHING_TOKEN,
+    token: UPLOADTHING_TOKEN,
   },
 })
 

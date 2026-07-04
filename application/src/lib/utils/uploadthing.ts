@@ -1,4 +1,4 @@
-import { ourFileRouter } from "$lib/server/uploadthing";
+import { OurFileRouter } from "$lib/server/uploadthing";
 import { generateSvelteHelpers } from "@uploadthing/svelte";
 
-export const { createUploader, createUploadThing } = generateSvelteHelpers<ourFileRouter>();
+export const { createUploader, createUploadThing } = generateSvelteHelpers<OurFileRouter>();

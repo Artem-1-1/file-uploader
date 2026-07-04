@@ -11,79 +11,83 @@ export const utapi = new UTApi({ token: UPLOADTHING_TOKEN });
 
 const f = createUploadthing();
 
-export  const ourFileRouter = {
+export const OurFileRouter = {
   fileUploader: f({
-    image: { maxFileSize: "4MB", maxFileCount: 4 },
-    pdf: { maxFileSize: "16MB", maxFileCount: 1 }
+    image: { maxFileSize: "4MB", maxFileCount: 50 },
+    pdf: { maxFileSize: "16MB", maxFileCount: 10 }
   })
   .input(z.object({
     parentId: z.string().nullable(),
-    filename: z.string().min(1),
-    fileSize: z.number().positive(),
   }))
-  .middleware(async ({ req, input }) => {
-    const session = await auth.api.getSession({ headers: req.headers})
-
-    if (!session || !session.user) {
-      throw new UploadThingError("Unauthorized")
-    }
+  .middleware(async ({ req, input, files }) => { 
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session || !session.user) throw new UploadThingError("Unauthorized");
 
     const currentUser = await db.query.user.findFirst({
       where: eq(user.id, session.user.id),
       columns: { id: true, storageUsed: true, storageLimit: true }
     });
-
     if (!currentUser) throw new UploadThingError("User not found");
 
-    const expectedStorageUsed = currentUser.storageUsed + input.fileSize;
+    const totalUploadSize = files.reduce((acc, f) => acc + f.size, 0);
+
+    const expectedStorageUsed = currentUser.storageUsed + totalUploadSize;
     if (expectedStorageUsed > currentUser.storageLimit) {
       throw new UploadThingError("Storage limit exceeded. Upgrade your plan.");
     }
 
-    const existingFile = await db.query.file.findFirst({
-      where: and(
-        eq(file.userId, session.user.id),
-        eq(file.name, input.filename),
-        input.parentId ? eq(file.parentId, input.parentId) : isNull(file.parentId),
-        isNull(file.deletedAt)
-      )
-    });
+    for (const uploadedFile of files) {
+      const existingFile = await db.query.file.findFirst({
+        where: and(
+          eq(file.userId, session.user.id),
+          eq(file.name, uploadedFile.name), 
+          input.parentId ? eq(file.parentId, input.parentId) : isNull(file.parentId),
+          isNull(file.deletedAt)
+        )
+      });
 
-    if (existingFile) {
-      throw new UploadThingError("File with this name already exists in this folder");
+      if (existingFile) {
+        throw new UploadThingError(`File "${uploadedFile.name}" already exists`);
+      }
     }
 
     return {
       userId: currentUser.id,
       parentId: input.parentId,
-      filename: input.filename,
     };
   })
-  .onUploadComplete(async ({metadata, file: uploadFile }) => {
-      const [updatedUser] = await db.update(user)
-      .set({ storageUsed: sql`${user.storageUsed} + ${uploadFile.size}` })
-      .where(and(
-        eq(user.id, metadata.userId),
-        sql`${user.storageUsed} + ${uploadFile.size} <= ${user.storageLimit}`
-      ))
-      .returning();
+  .onUploadComplete(async ({ metadata, file: uploadFile }) => {
+    try {
+      return await db.transaction(async (tx) => {
+        const [updatedUser] = await tx.update(user)
+          .set({ storageUsed: sql`${user.storageUsed} + ${uploadFile.size}` })
+          .where(and(
+            eq(user.id, metadata.userId),
+            sql`${user.storageUsed} + ${uploadFile.size} <= ${user.storageLimit}`
+          ))
+          .returning();
 
-    if (!updatedUser) {
-      throw new UploadThingError("Storage limit exceeded.");
+        if (!updatedUser) throw new UploadThingError("Storage limit exceeded.");
+
+        const [newFile] = await tx.insert(file).values({
+          userId: metadata.userId,
+          parentId: metadata.parentId,
+          name: uploadFile.name,
+          type: "file",
+          size: uploadFile.size,
+          mimeType: uploadFile.type,
+          storagePath: uploadFile.key,
+        }).returning();
+
+        return { fileId: newFile.id, url: uploadFile.ufsUrl };
+      });
+    } catch (error) {
+      console.error("Database transaction failed during upload:", error);
+      await utapi.deleteFiles([uploadFile.key]).catch(console.error);
+      if (error instanceof UploadThingError) throw error;
+      throw new UploadThingError("Failed to save file metadata.");
     }
-
-    const [newFile] = await db.insert(file).values({
-      userId: metadata.userId,
-      parentId: metadata.parentId,
-      name: metadata.filename,
-      type: "file",
-      size: uploadFile.size,
-      mimeType: uploadFile.type,
-      storagePath: uploadFile.key,
-    }).returning();
-
-    return { fileId: newFile.id, url: uploadFile.ufsUrl};
   }),
 } satisfies FileRouter;
 
-export type ourFileRouter = typeof ourFileRouter;
+export type OurFileRouter = typeof OurFileRouter;
