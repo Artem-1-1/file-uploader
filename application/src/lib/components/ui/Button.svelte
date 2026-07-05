@@ -4,7 +4,7 @@
 
   type BaseProps = {
     children: Snippet,
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'text';
     class?: string;
   }
 
@@ -83,5 +83,16 @@
 	.btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) {
 		text-decoration: underline;
 		background-color: color-mix(in srgb, currentColor 8%, transparent);
+	}
+
+	.btn-text {
+		background: none;
+		padding: 0;
+		border-radius: 0;
+		font-weight: bold;
+		color: var(--text-color);
+		border-bottom: 1px solid #7f7f7f;
+		padding-bottom: 2px;
+		box-shadow: none;
 	}
 </style>

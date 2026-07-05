@@ -1,6 +1,6 @@
 import { fail } from "@sveltejs/kit";
 import { UTFile } from "uploadthing/server";
-import { updateUserAvatar } from "$lib/server/users";
+import { updateUserAvatar, changeUsername, changeEmail } from "$lib/server/users";
 import { utapi } from "$lib/server/uploadthing";
 import type { Actions } from "./$types";
 
@@ -36,5 +36,52 @@ export const actions: Actions = {
       return fail(500, { message: 'Save error' });
     }
     return { success : true, newPhotoUrl };
+  },
+  updateUsername: async({ request, locals}) => {
+    const user = locals.user;
+    if (!user?.id) {
+      return fail(401, { message: 'Not authorized' });
+    }
+
+    const data = await request.formData();
+    const newUsername = data.get('username')?.toString();
+
+    if (!newUsername || newUsername.trim().length < 5) {
+      return fail(400, { message: 'Username must be at least 5 characters' });
+    }
+
+    if (newUsername.length > 50) {
+      return fail(400, { message: 'Username must be less than 50 characters' });
+    }
+
+    try {
+      await changeUsername(request.headers, newUsername.trim());
+      return { success: true, message: 'Username updated successfully' };
+    } catch (error: any) {
+      console.error('Error updating username:', error);
+      return fail(500, { message: error.message || 'Failed to update username' });
+    }
+  },
+  updateEmail: async ({ request, locals}) => {
+    const user = locals.user;
+    if (!user?.id) {
+      return fail(401, { message: 'Not authorized' });
+    }
+
+    const data = await request.formData();
+    const newEmail = data.get('email')?.toString();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newEmail || !emailRegex.test(newEmail)) {
+      return fail(400, { message: 'Invalid email format' });
+    }
+
+    try {
+      await changeEmail(user.id, newEmail.trim());
+      return { success: true, message: 'Email updated successfully' };
+    } catch (error: any) {
+      console.error('Error updating email:', error);
+      return fail(500, { message: error.message || 'Failed to update email' });
+    }
   }
 }

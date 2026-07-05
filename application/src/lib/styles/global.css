@@ -3,7 +3,6 @@
 	--light-green-hover: #1B8585;
 	--border-color: #dadce0;
 	--text-color: oklch(37.3% 0.034 259.733);
-
 	--dropdown-bg: #ffffff;
 	--dropdown-border: var(--border-color);
 	--dropdown-text-main: var(--text-color);
@@ -27,6 +26,7 @@ body {
 body.dark-mode {
 	background-color: oklch(21% 0.034 264.665);
 	color: oklch(92.8% 0.006 264.531);
+	--text-color: oklch(92.8% 0.006 264.531);
 	--dropdown-bg: oklch(28% 0.034 264.665);  
 	--dropdown-border: oklch(35% 0.034 264.665);   
 	--dropdown-text-main: oklch(92.8% 0.006 264.531); 

@@ -2,6 +2,7 @@ import { db } from "$lib/server/db";
 import { user } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { utapi } from "../uploadthing";
+import { auth } from "../auth";
 
 export async function getUserById(id: string) {
   const [foundUser] = await db
@@ -44,4 +45,52 @@ export async function updateUserAvatar(userId: string, newPhotoUrl: string, newP
     console.log("The user did not have an avatar.");
   }
   return newPhotoUrl;
+}
+
+export async function changeUsername(headers : Headers, newUsername: string) {
+  const updateUser = await auth.api.updateUser({
+    body: {
+      name: newUsername,
+    },
+    headers: headers,
+  });
+  return updateUser;
+}
+
+export async function changeEmail(userId: string, newEmail: string) {
+  const normalizedEmail = newEmail.trim().toLowerCase();
+
+  try {
+    const result = await db.transaction(async (tx) => {
+      const [existingUser] = await tx
+        .select()
+        .from(user)
+        .where(eq(user.email, normalizedEmail))
+        .limit(1);
+
+      if (existingUser) {
+        throw new Error("This email is already in use");
+      }
+
+      const [updatedUser] = await tx
+        .update(user)
+        .set({
+          email: normalizedEmail,
+          emailVerified: false,
+        })
+        .where(eq(user.id, userId))
+        .returning();
+      
+      return updatedUser;
+    });
+    
+    return result;
+  } catch (error: any) {
+    console.error('Full error:', error);
+    
+    if (error?.code === '23505' || error.message === "This email is already in use") {
+      throw new Error("This email is already in use");
+    }
+    throw error;
+  }
 }

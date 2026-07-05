@@ -1,8 +1,9 @@
-<script>
+<script lang="ts">
   import Avatar from "$lib/components/ui/Avatar.svelte";
   import Modal from "$lib/components/ui/Modal.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
   import { page } from "$app/state";
-  import { enhance } from "$app/forms";;
+  import { enhance } from "$app/forms";
 
   const user = $derived(page.data.user);
 
@@ -10,16 +11,30 @@
   let isEmailModalOpen = $state(false);
   let isUploading = $state(false);
 
+  let fileInput: HTMLInputElement;
+  let usernameForm = $state<HTMLFormElement>();
+  let emailForm = $state<HTMLFormElement>();
+
   let newUsername = $state('');
   let newEmail = $state('');
+
+  let usernameError = $state('');
+  let emailError = $state('');
 
   function handleCancel() {
     isUsernameModalOpen = false;
     isEmailModalOpen = false;
-    newUsername = user.name;
-    newEmail = user.email;
+    usernameError = '';
+    emailError = '';
   }
-  const handleConfirm = '';
+  
+  function submitUsernameForm() {
+    usernameForm?.requestSubmit();
+  }
+
+  function submitEmailForm() {
+    emailForm?.requestSubmit();
+  }
 </script>
 
 <div class="account-page">
@@ -43,12 +58,11 @@
               await update();
               isUploading = false;
             };
-          }}
-        >
-        <label class="custom-upload">
-          <input type="file" id="avatar" name="avatar" accept="image/*" onchange={(e) => e.currentTarget.form?.requestSubmit()}>
+          }}>
+        <input type="file" bind:this={fileInput} id="avatar" name="avatar" accept="image/*"  onchange={(e) => e.currentTarget.form?.requestSubmit()}>
+        <Button variant="text" onclick={() => fileInput?.click()}>
           Change
-        </label>
+        </Button>
         </form>
       </div>
     </div>
@@ -61,12 +75,34 @@
           <Modal 
             title="Change your username"
             bind:isOpen={isUsernameModalOpen}
-            onConfirm={handleConfirm}
+            onConfirm={submitUsernameForm}
             onCancel={handleCancel}>
-            <input type="text" class="modal-input" bind:value={newUsername}>
-          </Modal>
+            <form
+              bind:this={usernameForm} 
+              method="POST" 
+              action="?/updateUsername"
+              use:enhance={() => {
+                usernameError = '';
+                return async ({ result, update }) => {
+                  if (result.type === 'failure') {
+                    usernameError = (result.data as any)?.message || 'Error updating username';
+                  } else {
+                    await update();
+                    isUsernameModalOpen = false;
+                  }
+                };
+              }}>
+            <input type="text" name="username" class="modal-input" bind:value={newUsername} required>
+            {#if usernameError}
+              <p class="error-message">{usernameError}</p>
+            {/if}
+          </form>
+        </Modal>
         {/if}   
-        <button class="change-btn" onclick={() => isUsernameModalOpen = true}>Change</button>
+        <Button variant="text" onclick={() => {
+          newUsername = user.name;
+          isUsernameModalOpen = true;
+        }}>Change</Button>
       </div>
     </div>
 
@@ -75,15 +111,38 @@
       <div class="module-right">
         {user.email}
         {#if isEmailModalOpen}
-        <Modal 
+          <Modal 
           title="Change your email"
           bind:isOpen={isEmailModalOpen}
-          onConfirm={handleConfirm}
+          onConfirm={submitEmailForm}
           onCancel={handleCancel}>
-          <input type="email" class="modal-input" bind:value={newEmail}>
+          <form
+            bind:this={emailForm} 
+            id="email-form"
+            method="POST" 
+            action="?/updateEmail"
+            use:enhance={() => {
+              emailError = '';
+              return async ({ result, update }) => {
+                if (result.type === 'failure') {
+                  emailError = (result.data as any)?.message || 'Error updating email';
+                } else {
+                  await update();
+                  isEmailModalOpen = false;
+                }
+              };
+            }}>
+          <input type="email" name="email" class="modal-input" bind:value={newEmail} required>
+          {#if emailError}
+            <p class="error-message">{emailError}</p>
+          {/if}
+        </form>  
         </Modal>
         {/if} 
-        <button class="change-btn" onclick={() => isEmailModalOpen = true}>Change</button>
+        <Button variant="text" onclick={() => {
+          newEmail = user.email;
+          isEmailModalOpen = true;
+        }}>Change</Button>
       </div>
     </div>
   </div>
@@ -115,28 +174,8 @@
     align-items: center;
     gap: 16px;
   }
-
-  .custom-upload {
-    display: inline-block; 
-    font-weight: bold;
-    border-bottom: 1px solid #7f7f7f;
-    padding-bottom: 2px;
-    cursor: pointer; 
-  }
-
-  .change-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-family: inherit;
-    font-size: inherit;
-
-    display: inline-block; 
-    font-weight: bold;
-    color: #1e1e1e;
-    border-bottom: 1px solid #7f7f7f;
-    padding-bottom: 2px;
-    cursor: pointer;
+  .error-message {
+    color: red;
+    margin-top: 8px;
   }
 </style>
