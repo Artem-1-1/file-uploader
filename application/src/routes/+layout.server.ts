@@ -15,6 +15,8 @@ export const load: LayoutServerLoad = async ({ locals }) => {
       email: freshUser.email,
       image: freshUser.image,
       role: freshUser.role,
+      storageUsed: freshUser.storageUsed,
+      storageLimit: freshUser.storageLimit,
     } : null
   };
 };
