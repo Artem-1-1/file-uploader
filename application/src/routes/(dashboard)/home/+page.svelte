@@ -4,7 +4,9 @@
   import "@uploadthing/svelte/styles.css"; 
   import type { PageData } from "./$types";
   import { invalidateAll } from "$app/navigation";
-  import { formatDate, formatSize } from "$lib/utils/formatters";
+  import { formatDate, formatSize, formatFileType, getFileIcon } from "$lib/utils/formatters";
+  import FileActionsMenu from "$lib/components/ui/FileActionsMenu.svelte";
+  import Modal from "$lib/components/ui/Modal.svelte";
 
   let {data} : { data: PageData } = $props(); 
   
@@ -12,6 +14,10 @@
 
   let isDragging = $state(false);
   let dragCounter = 0;
+
+  let isRenameModalOpen = $state(false);
+  let activeFileId = $state("");
+  let newFileName = $state("");
 
   const uploader = createUploader("fileUploader", {
     input: {
@@ -55,6 +61,72 @@
     dragCounter = 0;
     isDragging = false;
   }
+
+  function handleDownload(id: string) {
+    console.log("Downloading file:", id);
+  }
+
+  function handleInfo(id: string) {
+    console.log("Showing file info:", id);
+  }
+
+  function openRenameModal(fileId: string) {
+    const targetFile = data.files.find(f => f.id === fileId);
+    if (!targetFile) return;
+
+    activeFileId = fileId;
+    newFileName = targetFile.name;
+    isRenameModalOpen = true;
+  }
+
+  async function handleRenameConfirm() {
+    if (!newFileName.trim()) return;
+
+    try {
+      const response = await fetch("/api/files", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileId: activeFileId,
+          action: "rename",
+          newName: newFileName
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to rename");
+      }
+      await invalidateAll();
+      isRenameModalOpen = false;
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+    }
+  }
+
+  function handleRenameCancel() {
+    isRenameModalOpen = false;
+    activeFileId = "";
+    newFileName = "";
+  }
+
+  async function handleSoftDelete(fileId: string) {
+    try {
+      const response = await fetch("/api/files", {
+        method: "PATCH",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ fileId, action: "basket" })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Fail move file to basket.")
+      }
+      await invalidateAll();
+    } catch (error: any) {
+      console.log(`Error deleting file: ${error.message}`);
+    }
+  }
 </script>
 
 <main class="page-container">
@@ -67,7 +139,6 @@
       </div>
       <h2>All files</h2>
     </div>
-
 
     <div 
       class="table-wrapper"
@@ -98,29 +169,21 @@
             {#each data.files as file}
               <div class="table-row">
                 <div class="col-name file-info">
-                  {#if file.type === 'folder'}
-                    <img src="/images/folder.svg" alt="folder icon" class="icon">
-                  {:else}
-                    <img src="/images/image.svg" alt="file icon" class="icon">
-                  {/if}
+                  <img src={getFileIcon(file.type, file.mimeType)} alt="file icon" class="icon">
                   <div class="file-name">{file.name}</div>    
                 </div>
                 <div class="col-date">{formatDate(file.createdAt)}</div>
-                <div class="col-type">{file.type}</div>
+                <div class="col-type">{formatFileType(file.type, file.mimeType)}</div>
                 <div class="col-size">{formatSize(file.size)}</div>
                 <div class="col-actions">
-          <button 
-            type="button" 
-            class="action-menu-btn" 
-            aria-label="Actions menu"
-            onclick={(e) => {
-              e.stopPropagation();
-              console.log('Open menu for', file.name);
-            }}
-          >
-            <img src="/images/dot-menu-more.svg" alt="more actions" class="icon">
-          </button>
-        </div>
+                  <FileActionsMenu 
+                  fileId={file.id} 
+                  onDownload={handleDownload}
+                  onInfo={handleInfo}
+                  onRename={openRenameModal}
+                  onDelete={handleSoftDelete}
+                />
+              </div>
               </div>
             {/each} 
           </div>
@@ -128,6 +191,26 @@
       {/if}
     </div>
   </div>
+  <Modal 
+    title="Rename File" 
+    bind:isOpen={isRenameModalOpen} 
+    onConfirm={handleRenameConfirm}
+    onCancel={handleRenameCancel}
+  >
+    <div class="rename-input-container">
+      <label for="file-name-input">Enter new name:</label>
+      <input 
+        id="file-name-input"
+        type="text" 
+        bind:value={newFileName} 
+        class="modal-input"
+        placeholder="File name"
+        onkeydown={(e) => {
+          if (e.key === 'Enter') handleRenameConfirm();
+        }}
+      />
+    </div>
+  </Modal>
 </main>
 
 <style>
@@ -236,21 +319,5 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.action-menu-btn {
-  background: none;
-  border: none;
-  padding: 6px;
-  cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-}
-
-.action-menu-btn:hover {
-  background-color: #e1e1e1;
 }
 </style>

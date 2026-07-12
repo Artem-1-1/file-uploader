@@ -14,7 +14,8 @@ const f = createUploadthing();
 export const OurFileRouter = {
   fileUploader: f({
     image: { maxFileSize: "4MB", maxFileCount: 50 },
-    pdf: { maxFileSize: "16MB", maxFileCount: 10 }
+    pdf: { maxFileSize: "16MB", maxFileCount: 10 },
+    text: { maxFileSize: "4MB", maxFileCount: 10 },
   })
   .input(z.object({
     parentId: z.string().nullable(),
