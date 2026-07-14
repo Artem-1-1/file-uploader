@@ -1,4 +1,4 @@
-import { eq, and, isNull, isNotNull, inArray, desc } from "drizzle-orm";
+import { eq, and, isNull, isNotNull, inArray, desc, sql } from "drizzle-orm";
 import { db } from "$lib/server/db";
 import { file } from "../db/schema";
 import { utapi } from "../uploadthing";
@@ -40,6 +40,7 @@ export async function renameUserFile(userId: string, fileId: string, newName: st
       )
     )
     .returning({ id: file.id });
+
   if (!updatedFile) {
     throw new Error("File not found or access denied");
   }
@@ -57,29 +58,10 @@ export async function getDeletedUserFiles(userId: string) {
 }
 
 export async function softDeleteUserFile(userId: string, fileId: string) {
-  const [targetFile] = await db
-    .select({
-      id: file.id,
-      type: file.type
-    })
-    .from(file)
-    .where(
-      and(
-        eq(file.id, fileId),
-        eq(file.userId, userId),
-        isNull(file.deletedAt)
-      )
-    )
-    .limit(1);
+  const idsToDelete = await getFolderSubtreeIds(userId, fileId);
 
-  if (!targetFile) {
-    throw new Error("File not found, access denied, or already deleted.");
-  }
-
-  const idsToSoftDelete: string[] = [fileId];
-
-  if (targetFile.type === "folder") {
-    await collectFolderContentsForSoftDelete(userId, fileId, idsToSoftDelete);
+  if (idsToDelete.length === 0) {
+    throw new Error("File not found.")
   }
 
   await db
@@ -87,7 +69,7 @@ export async function softDeleteUserFile(userId: string, fileId: string) {
     .set({ deletedAt: new Date() })
     .where(
       and(
-        inArray(file.id, idsToSoftDelete),
+        inArray(file.id, idsToDelete),
         eq(file.userId, userId)
       )
     );
@@ -95,60 +77,23 @@ export async function softDeleteUserFile(userId: string, fileId: string) {
   return { success: true };
 }
 
-async function collectFolderContentsForSoftDelete(
-  userId: string, 
-  folderId: string, 
-  allIds: string[]
-) {
-  const children = await db
-    .select({ 
-      id: file.id, 
-      type: file.type
-    })
-    .from(file)
-    .where(
-      and(
-        eq(file.parentId, folderId),
-        eq(file.userId, userId),
-        isNull(file.deletedAt)
-      )
-    );
-
-  for (const child of children) {
-    allIds.push(child.id);
-    
-    if (child.type === "folder") {
-      await collectFolderContentsForSoftDelete(userId, child.id, allIds);
-    }
-  }
-}
-
 export async function permanentlyDeleteUserFile(userId: string, fileId: string) {
-  const [targetFile] = await db
-  .select({
-    storagePath: file.storagePath,
-    type: file.type
-  })
-  .from(file)
-  .where(
-    and(
-      eq(file.id, fileId),
-      eq(file.userId, userId)
-    )
-  )
-  .limit(1)
+  const itemsToDelete = await getFolderSubtreeDetails(userId, fileId);
 
-  if(!targetFile) {
-    throw new Error("File not found or access denied.")
+  if (itemsToDelete.length === 0) {
+    throw new Error("File not found.");
   }
 
-  const idsToDelete: string[] = [fileId];
-  const keysToDelete: string[] = [];
+  const idsToDelete = itemsToDelete.map(item => item.id);
+  const keysToDelete = itemsToDelete.map(item => item.storagePath).filter((path): path is string => !!path);
 
-  if (targetFile.type === "folder") {
-    await collectFolderContentsForPermDelete(userId, fileId, idsToDelete, keysToDelete);
-  } else if (targetFile.storagePath) {
-    keysToDelete.push(targetFile.storagePath);
+  if (keysToDelete.length > 0) {
+    try {
+      await utapi.deleteFiles(keysToDelete);
+    } catch (error) {
+      console.error("Failed to delete files from UploadThing:", error);
+      throw new Error("Failed to delete files from storage. Please try again.");
+    }
   }
 
   await db
@@ -160,43 +105,52 @@ export async function permanentlyDeleteUserFile(userId: string, fileId: string) 
       )
     );
 
-  if (keysToDelete.length > 0) {
-    try {
-      await utapi.deleteFiles(keysToDelete);
-    } catch (error) {
-      console.error("Failed to delete files from UploadThing:", error);
-    }
-  }
   return { success: true}
 }
 
-async function collectFolderContentsForPermDelete(
-  userId: string, 
-  folderId: string, 
-  allIds: string[], 
-  allKeys: string[]
-) {
-  const children = await db
-    .select({ 
-      id: file.id, 
-      type: file.type, 
-      storagePath: file.storagePath 
-    })
-    .from(file)
+
+export async function restoreUserFile(userId: string, fileId: string) {
+  const idsToRestore = await getFolderSubtreeIds(userId, fileId);
+
+  if (idsToRestore.length === 0) {
+    throw new Error("File not found.")
+  }
+
+  await db
+    .update(file)
+    .set({ deletedAt: null, updatedAt: new Date()})
     .where(
       and(
-        eq(file.parentId, folderId),
+        inArray(file.id, idsToRestore),
         eq(file.userId, userId)
       )
-    );
+    )
 
-  for (const child of children) {
-    allIds.push(child.id);
-    
-    if (child.type === "folder") {
-      await collectFolderContentsForPermDelete(userId, child.id, allIds, allKeys);
-    } else if (child.storagePath) {
-      allKeys.push(child.storagePath); 
-    }
-  }
+  return { success: true }  
+} 
+
+async function getFolderSubtreeDetails(userId: string, rootId: string): Promise<Array<{ id: string; storagePath: string | null }>> {
+  const query = sql`
+    WITH RECURSIVE folder_tree AS (
+      SELECT ${file.id} AS id, ${file.storagePath} AS storage_path
+      FROM ${file} 
+      WHERE ${file.id} = ${rootId} AND ${file.userId} = ${userId}
+      
+      UNION ALL
+      
+      SELECT ${file.id}, ${file.storagePath}
+      FROM ${file}
+      INNER JOIN folder_tree ft ON ${file.parentId} = ft.id
+      WHERE ${file.userId} = ${userId}
+    )
+    SELECT id, storage_path AS "storagePath" FROM folder_tree;
+  `;
+
+  const rows = await db.execute(query);
+  return rows as unknown as Array<{ id: string; storagePath: string | null }>;
+}
+
+async function getFolderSubtreeIds(userId: string, rootId: string): Promise<string[]> {
+  const details = await getFolderSubtreeDetails(userId, rootId);
+  return details.map((row) => row.id);
 }

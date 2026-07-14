@@ -83,13 +83,13 @@
       {:else}
         {#if onRestore}
           <button type="button" onclick={() => { onRestore(fileId); closeMenu(); }}>
-            <img src="/images/icons/restore.svg" alt="Restore" class="icon" />
+            <img src="/images/restore.svg" alt="Restore" class="icon" />
             Restore
           </button>
         {/if}
         {#if onDelete}
           <button type="button" class="danger-btn" onclick={() => { onDelete(fileId); closeMenu(); }}>
-            <img src="/images/icons/garbage-basket.svg" alt="Permanently delete" class="icon" />
+            <img src="/images/garbage-basket.svg" alt="Permanently delete" class="icon" />
             Delete Permanently
           </button>
         {/if}
@@ -97,7 +97,6 @@
     </div>
   {/if}
 </div>
-
 
 <style>
 .menu-container {
@@ -117,7 +116,7 @@
 }
 
 .action-menu-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--dropdown-border);
 }
 
 .dropdown-menu {
@@ -126,8 +125,8 @@
   top: 100%;
   z-index: 50;
   min-width: 160px;
-  background-color: white;
-  border: 1px solid #e2e8f0;
+  background-color: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 4px;
@@ -148,23 +147,19 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #334155;
+  color: var(--dropdown-text-main);
 }
 
 .dropdown-menu button:hover {
-  background-color: #f1f5f9;
-}
-
-.dropdown-menu button.danger-btn {
-  color: #ef4444;
-}
-
-.dropdown-menu button.danger-btn:hover {
-  background-color: #fef2f2;
+  background-color: var(--dropdown-border);
 }
 
 .icon, .icon {
   width: 24px;
   height: 24px;
+}
+
+:global(body.dark-mode) .icon { 
+  filter: invert(); 
 }
 </style>

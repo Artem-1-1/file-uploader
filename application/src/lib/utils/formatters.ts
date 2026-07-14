@@ -26,7 +26,7 @@ interface FileTypeConfig {
 const MIME_MAP: Record<string, FileTypeConfig> = {
   "image/svg+xml" : { label : "SVG Image", icon : "/images/svg-icon.svg" },
   "application/pdf" : { label : "PDF Document", icon : "/images/pdf.svg" },
-  "text/plain" : {label: "Text Document", icon: "/images/text-file-icon.svg" },
+  "text/plain" : {label: "Text Document", icon: "/images/text-file.svg" },
   "text/csv" : { label : " CSV Spreadsheet", icon : "images/cvg-icon.svg" },
 };
 
