@@ -19,7 +19,6 @@
 
   {#if $fileSidebarStore.isOpen}
     <FileSidebar 
-      isOpen={$fileSidebarStore.isOpen} 
       file={$fileSidebarStore.file} 
       onClose={() => fileSidebarStore.close()} 
     />
