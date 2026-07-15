@@ -154,3 +154,36 @@ async function getFolderSubtreeIds(userId: string, rootId: string): Promise<stri
   const details = await getFolderSubtreeDetails(userId, rootId);
   return details.map((row) => row.id);
 }
+
+export async function getFileForDownload(userId: string, fileId: string) {
+  const [fileFromDb] = await db
+    .select({
+      id: file.id,
+      name: file.name,
+      mimeType: file.mimeType,
+      type: file.type,
+      storagePath: file.storagePath,
+    })
+    .from(file)
+    .where(
+      and(
+        eq(file.id, fileId),
+        eq(file.userId, userId),
+        isNull(file.deletedAt)
+      )
+    );
+
+  if (!fileFromDb) {
+    throw new Error("File not found.");
+  }
+
+  if (fileFromDb.type === "folder") {
+    throw new Error("Cannot download a folder directly");
+  }
+
+  if (!fileFromDb.storagePath) {
+    throw new Error("File storage path is missing.");
+  }
+
+  return fileFromDb; 
+}

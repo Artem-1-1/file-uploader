@@ -75,7 +75,7 @@
 
   .toggle-btn:hover,
   .nav-link:hover {
-    background-color: var(--border-color);
+    background-color: var(--dropdown-bg-hover);
   }
 
   .sidebar-nav {
@@ -119,5 +119,6 @@
   .icon {
     width: 24px;
     height: 24px;
+    filter: var(--svg-invert);
   }
 </style>

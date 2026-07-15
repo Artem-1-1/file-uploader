@@ -2,7 +2,7 @@
   interface Props {
     fileId: string;
     isDeletedView?: boolean;
-    onDownload?: (id: string) => void;
+    canDownload?: boolean;
     onInfo?: (id: string) => void;
     onRename?: (id: string) => void;
     onRestore?: (id: string) => void;
@@ -12,7 +12,7 @@
   let {
     fileId,
     isDeletedView = false,
-    onDownload,
+    canDownload = false,
     onInfo,
     onRename,
     onRestore,
@@ -56,11 +56,15 @@
       }}
       >
       {#if !isDeletedView}
-        {#if onDownload}
-          <button type="button" onclick={() => { onDownload(fileId); closeMenu(); }}>
+        {#if canDownload}
+          <a 
+            href={`/api/files?fileId=${fileId}`} 
+            download
+            onclick={() => closeMenu()}
+            class="button">
             <img src="/images/circled-down.svg" alt="Download" class="icon" />
             Download
-          </button>
+          </a>
         {/if}
         {#if onRename}
           <button type="button" onclick={() => { onRename(fileId); closeMenu(); }}>
@@ -70,7 +74,7 @@
         {/if}
         {#if onInfo}
           <button type="button" onclick={() => { onInfo(fileId); closeMenu(); }}>
-            <img src="/images/circled-down.svg" alt="File Information" class="icon" />
+            <img src="/images/circled-info.svg" alt="File Information" class="icon" />
             Information
           </button>
         {/if}
@@ -81,6 +85,12 @@
           </button>
         {/if}
       {:else}
+        {#if onInfo}
+          <button type="button" onclick={() => { onInfo(fileId); closeMenu(); }}>
+            <img src="/images/circled-info.svg" alt="File Information" class="icon" />
+            Information
+          </button>
+        {/if}
         {#if onRestore}
           <button type="button" onclick={() => { onRestore(fileId); closeMenu(); }}>
             <img src="/images/restore.svg" alt="Restore" class="icon" />
@@ -135,7 +145,8 @@
   gap: 2px;
 }
 
-.dropdown-menu button {
+.dropdown-menu button,
+.dropdown-menu a {
   width: 100%;
   padding: 8px 12px;
   text-align: left;
@@ -148,18 +159,20 @@
   align-items: center;
   gap: 8px;
   color: var(--dropdown-text-main);
+  text-decoration: none;
 }
 
-.dropdown-menu button:hover {
-  background-color: var(--dropdown-border);
+.dropdown-menu button:hover,
+.dropdown-menu a:hover {
+  background-color: var(--dropdown-bg-hover);
 }
 
-.icon, .icon {
+.icon {
   width: 24px;
   height: 24px;
 }
 
-:global(body.dark-mode) .icon { 
-  filter: invert(); 
+.icon { 
+  filter: var(--svg-invert); 
 }
 </style>

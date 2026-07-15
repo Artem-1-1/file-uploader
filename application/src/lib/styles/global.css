@@ -33,6 +33,8 @@ body.dark-mode {
 	--dropdown-text-muted: oklch(75% 0.015 264.531);
 	--dropdown-hr: oklch(35% 0.034 264.665);       
 	--shadow-dropdown: rgba(0, 0, 0, 0.5);
+	--dropdown-bg-hover: oklch(33% 0.034 264.665);
+	--svg-invert: invert(1);
 }
 
 .auth-main {

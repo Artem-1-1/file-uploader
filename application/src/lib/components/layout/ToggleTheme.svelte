@@ -29,7 +29,11 @@
 		height: 32px;
 	}
 
-  :global(body.dark-mode) button {
-		filter: invert();
+  :global(body.dark-mode) button img {
+		filter: var(--svg-invert);
 	}
+
+	:global(body.dark-mode) button:hover {
+    background-color: var(--dropdown-bg-hover);
+  }
 </style>

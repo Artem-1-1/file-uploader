@@ -2,8 +2,16 @@
   import type { PageData } from "./$types";
   import { invalidateAll } from "$app/navigation";
   import FileTable from "$lib/components/ui/FileTable.svelte";
+  import { fileSidebarStore } from "$lib/stores/fileSidebar.svelte";
 
   let { data }: { data: PageData } = $props();
+
+  function handleInfo(fileId: string) {
+    const file = data.deletedFiles.find(f => f.id === fileId);
+    if (file) {
+      fileSidebarStore.open(file);
+    }
+  }
 
   async function handleRestore(fileId: string) {
     try {
@@ -41,18 +49,15 @@
   }
 </script>
 
-<main class="page-container">
-  <div class="page-nav">
-    <div class="page-header">
-      <h2>Basket</h2>
-    </div>
+<div class="page-header">
+  <h2>Basket</h2>
+</div>
 
-    <div class="table-wrapper">
-      <FileTable
-      files={data.deletedFiles}
-      isDeletedView={true}
-      onRestore={handleRestore}
-      onDelete={handleHardDelete}/>
-    </div>
-  </div>  
-</main>
+<div class="table-wrapper">
+  <FileTable
+  files={data.deletedFiles}
+  isDeletedView={true}
+  onInfo={handleInfo}
+  onRestore={handleRestore}
+  onDelete={handleHardDelete}/>
+</div> 

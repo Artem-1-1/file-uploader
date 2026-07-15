@@ -1,5 +1,7 @@
 <script lang="ts">
   import Sidebar from "$lib/components/ui/Sidebar.svelte";
+  import FileSidebar from "$lib/components/ui/FileSidebar.svelte";
+  import { fileSidebarStore } from "$lib/stores/fileSidebar.svelte";
 
   let { children } = $props();
   let isSidebarOpen = $state(true);
@@ -9,11 +11,19 @@
   }
 </script>
 
-<main class="page-container" style="--sidebar-width: {isSidebarOpen ? '260px' : '64px'}">
+<main class="page-container" class:file-sidebar-open={$fileSidebarStore.isOpen} style="--sidebar-width: {isSidebarOpen ? '260px' : '64px'}">
   <Sidebar bind:isSidebarOpen onToggle={toggleSidebar}/>
   <div class="page-nav">
     {@render children()}
   </div>
+
+  {#if $fileSidebarStore.isOpen}
+    <FileSidebar 
+      isOpen={$fileSidebarStore.isOpen} 
+      file={$fileSidebarStore.file} 
+      onClose={() => fileSidebarStore.close()} 
+    />
+  {/if}
 </main>
 
 <style>
@@ -23,6 +33,10 @@
     min-height: 100vh;
     box-sizing: border-box;
     transition: grid-template-columns 0.2s ease;
+  }
+
+  .page-container.file-sidebar-open {
+    grid-template-columns: var(--sidebar-width) 1fr 300px;
   }
 
   .page-nav {

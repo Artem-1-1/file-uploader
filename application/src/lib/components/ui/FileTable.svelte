@@ -15,7 +15,7 @@
   interface Props {
     files: FileItem[],
     isDeletedView?: boolean;
-    onDownload?: (id: string) => void;
+    canDownload?: boolean;
     onInfo?: (id: string) => void;
     onRename?: (id: string, newName: string) => void;
     onRestore?: (id: string) => void;
@@ -25,7 +25,11 @@
   let {
     files,
     isDeletedView = false,
-    onDownload, onInfo, onRename, onRestore, onDelete
+    canDownload = false,
+    onInfo,
+    onRename,
+    onRestore, 
+    onDelete
   }: Props = $props();
 
   let isRenameModalOpen = $state(false);
@@ -79,7 +83,7 @@
             <FileActionsMenu
               fileId={file.id}
               {isDeletedView}
-              {onDownload}
+              {canDownload}
               {onInfo}
               onRename={isDeletedView ? undefined : openRenameModal}
               {onRestore}

@@ -5,6 +5,7 @@
   import type { PageData } from "./$types";
   import { invalidateAll } from "$app/navigation";
   import FileTable from "$lib/components/ui/FileTable.svelte";
+  import { fileSidebarStore } from "$lib/stores/fileSidebar.svelte";
 
   let {data} : { data: PageData } = $props(); 
   
@@ -56,12 +57,11 @@
     isDragging = false;
   }
 
-  function handleDownload(id: string) {
-    console.log("Downloading file:", id);
-  }
-
-  function handleInfo(id: string) {
-    console.log("Showing file info:", id);
+  function handleInfo(fileId: string) {
+    const file = data.files.find(f => f.id === fileId);
+    if (file) {
+      fileSidebarStore.open(file);
+    }
   }
 
   async function handleRename(fileId: string, newName: string) {
@@ -127,8 +127,8 @@
 
   <FileTable 
     files={data.files} 
-    onDownload={(id) => console.log("Download", id)}
-    onInfo={(id) => console.log("Info", id)}
+    canDownload={true}
+    onInfo={handleInfo}
     onRename={handleRename}
     onDelete={handleSoftDelete}
   />
