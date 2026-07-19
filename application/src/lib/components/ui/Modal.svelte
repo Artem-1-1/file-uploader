@@ -5,8 +5,16 @@
 {#if isOpen}
   <div class="modal-overlay" onclick={onCancel} role="presentation">
     <div class="modal-content" onclick={(e) => e.stopPropagation()} role="presentation">
-      <h2>{title}</h2>
-      {@render children()}
+      <button class="modal-close-btn" onclick={onCancel} aria-label="Close modal">
+        <img src="/images/close.svg" alt="close icon" class="icon">
+      </button>
+
+      <h2 class="modal-title">{title}</h2>
+
+      <div class="modal-body">
+        {@render children()}
+      </div>
+
       <div class="modal-actions">
         <button onclick={onCancel}>Cancel</button>
         <button onclick={onConfirm}>Confirm</button>
@@ -22,7 +30,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(2px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,26 +39,69 @@
   }
 
   .modal-content {
-    background-color: #ffffff;
-    padding: 32px;
-    border-radius: 8px;
-    max-width: 400px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--dropdown-border);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 10px 25px -5px var(--shadow-dropdown), 0 8px 10px -6px var(--shadow-dropdown);
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .modal-close-btn {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.15s, color 0.15s;
+  }
+
+  .modal-title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-color);
+    padding-right: 32px;
+  }
+
+  .modal-close-btn:hover {
+    background-color: var(--dropdown-bg-hover);
+  }
+
+  .modal-body {
+    width: 100%;
   }
 
   .modal-actions {
     display: flex;
     justify-content: end;
-    gap: 12px;
+    gap: 1rem;
     margin-top: 24px;
   }
 
   .modal-actions button {
     padding: 10px 20px;
-    font-size: 14px;
+    font-size: 0.9rem;
     font-weight: 600;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s;
+    transition: all 0.15s ease;
+  }
+
+  .icon {
+    width: 30px;
+    height: 30px;
+    filter: var(--svg-invert);
   }
 </style>

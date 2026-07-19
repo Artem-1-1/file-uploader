@@ -1,7 +1,23 @@
-import { json } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import { json, type RequestHandler } from "@sveltejs/kit";
+import { z } from "zod";
 import { permanentlyDeleteUserFile, renameUserFile, restoreUserFile, softDeleteUserFile, getFileForDownload } from "$lib/server/files";
 import { UPLOADTHING_APP_ID } from "$env/static/private";
+
+const FileIdSchema = z.object({
+  fileId: z.string().min(1, "Missing fileId")
+})
+
+const PatchActionSchema = z.discriminatedUnion("action", [
+  FileIdSchema.extend({ action: z.literal("basket") }),
+  FileIdSchema.extend({ action: z.literal("restore") }),
+  FileIdSchema.extend({ action: z.literal("rename"), newName: z.string().min(1, "Missing newName")})
+]);
+
+const handleServerError = (error: unknown, context: string) => {
+  console.error(`API ${context} Error:`, error);
+  return json({ error: "Internal Server Error" }, { status: 500 });
+};
+
 
 export const GET: RequestHandler = async({ url, locals}) => {
   const userId = locals.user?.id;
@@ -9,10 +25,11 @@ export const GET: RequestHandler = async({ url, locals}) => {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const fileId = url.searchParams.get("fileId");
-  if (!fileId) {
-    return json({ error: "Missing fileId" }, { status: 400 });
+  const queryResult = FileIdSchema.safeParse({ fileId: url.searchParams.get("fileId")});
+  if (!queryResult.success) {
+    return json({ error: queryResult.error.issues[0].message }, { status: 400 });
   }
+  const { fileId } = queryResult.data;
 
   try {
     const fileData = await getFileForDownload(userId, fileId);
@@ -31,9 +48,9 @@ export const GET: RequestHandler = async({ url, locals}) => {
         "Cache-Control": "private, max-age=3600"
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error("API Get Download Error: ", error);
-    return json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return handleServerError(error, "Get Download");
   }
 }
 
@@ -44,27 +61,31 @@ export const PATCH: RequestHandler = async({ request, locals }) => {
   }
 
   try {
-    const { fileId, action, newName } = await request.json();
+    const body = await request.json();
 
-  if (!fileId || !action) {
-    return json({ error: "Missing fileId or action" }, { status: 400 });
-  }
-  if (action === "basket") {
-    await softDeleteUserFile(userId, fileId)
-  } else if (action === "rename") {
-    if (!newName) return json({ error: "Missing newName" }, { status: 400 });
-    await renameUserFile(userId, fileId, newName)
-  } else if (action === "restore"){
-    await restoreUserFile(userId, fileId)
-  }
-   else {
-    return json({ error: "Invalid action" }, { status: 400 });
-  }
+    const parseResult = PatchActionSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.issues[0];
+      const errorMessage = firstError.message === "Required" ? `Missing ${firstError.path.join(".")}` : firstError.message;
+      return json({ error: errorMessage }, { status: 400 });
+    }
 
+    const data = parseResult.data;
+
+    switch (data.action) {
+      case "basket":
+        await softDeleteUserFile(userId, data.fileId);
+        break
+      case "restore":
+        await restoreUserFile(userId, data.fileId);
+        break
+      case "rename":
+        await renameUserFile(userId, data.fileId, data.newName)
+    }
+    
   return json({ success: true});
-  } catch(error: any) {
-    console.error("API Patch Error: ", error);
-    return json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  } catch(error) {
+    return handleServerError(error, "Patch");
   }
 };
 
@@ -75,16 +96,19 @@ export const DELETE: RequestHandler = async({ request, locals }) => {
   }
 
   try {
-    const { fileId } = await request.json();
+    const body = await request.json();
 
-    if (!fileId) {
-    return json({ error: "Missing fileId." }, { status: 400 });
+    const parseResult = FileIdSchema.safeParse(body);
+
+    if (!parseResult.success) {
+      return json({ error: parseResult.error.issues[0].message }, { status: 400 });
     }
 
-    await permanentlyDeleteUserFile(userId, fileId);
+    const { fileId } = parseResult.data;
+    await permanentlyDeleteUserFile(userId, fileId)
+
     return json({ success: true});
-  } catch (error: any) {
-    console.error("API Delete Error: ", error);
-    return json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  } catch (error) {
+    return handleServerError(error, "Delete");
   }
 }

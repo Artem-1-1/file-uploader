@@ -2,6 +2,7 @@
   import Avatar from "$lib/components/ui/Avatar.svelte";
   import Modal from "$lib/components/ui/Modal.svelte";
   import Button from "$lib/components/ui/Button.svelte";
+  import Input from "$lib/components/ui/Input.svelte";
   import { page } from "$app/state";
   import { enhance } from "$app/forms";
 
@@ -38,7 +39,12 @@
 </script>
 
 <div class="account-page">
-  <h1 class="page-title">Personal account</h1>
+  <div class="page-title">  
+    <button onclick={() => history.back()} class="back-btn" aria-label="Back">
+      <img src="/images/arrow-left.svg" alt="back icon" class="icon">
+    </button>
+    <h1 class="page-header">Personal account</h1>
+  </div>
   <div class="account-information">
     <div class="account-header">
       <h2>Basic information</h2>
@@ -92,10 +98,7 @@
                   }
                 };
               }}>
-            <input type="text" name="username" class="modal-input" bind:value={newUsername} required>
-            {#if usernameError}
-              <p class="error-message">{usernameError}</p>
-            {/if}
+              <Input type="text" name="username" label="New Username" bind:value={newUsername} error={usernameError} required/>
           </form>
         </Modal>
         {/if}   
@@ -111,7 +114,7 @@
       <div class="module-right">
         {user.email}
         {#if isEmailModalOpen}
-          <Modal 
+        <Modal 
           title="Change your email"
           bind:isOpen={isEmailModalOpen}
           onConfirm={submitEmailForm}
@@ -132,10 +135,7 @@
                 }
               };
             }}>
-          <input type="email" name="email" class="modal-input" bind:value={newEmail} required>
-          {#if emailError}
-            <p class="error-message">{emailError}</p>
-          {/if}
+          <Input type="email" name="email" label="New Email" bind:value={newEmail} error={emailError} required/>
         </form>  
         </Modal>
         {/if} 
@@ -157,6 +157,25 @@
     gap: 16px;
   }
 
+  .page-title {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .back-btn {
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    background: none;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .account-header {
+    margin-bottom: 1rem;
+  }
+
   input[type="file"] {
   display: none;
   }
@@ -174,8 +193,10 @@
     align-items: center;
     gap: 16px;
   }
-  .error-message {
-    color: red;
-    margin-top: 8px;
+  
+  .icon {
+    width: 30px;
+    height: 30px;
+    filter: var(--svg-invert);
   }
 </style>

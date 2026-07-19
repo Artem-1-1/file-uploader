@@ -1,17 +1,19 @@
 <script lang="ts">
 	import AuthForm from "$lib/components/auth/AuthForm.svelte";
+	import Input from "$lib/components/ui/Input.svelte";
 	import type { PageProps } from './$types';
 	import { page } from "$app/state";
-	import "$lib/styles/global.css";
 
 	let isSubmitting = $state(false);
 	let { form }: PageProps = $props();
 
 	let successMessage = $derived(
-    page.url.searchParams.get('message') === 'password_reset_success' 
-      ? 'Password has been successfully reset.' 
-      : ''
-  );
+  page.url.searchParams.get('message') === 'signup_success'
+    ? 'Account created successfully! Please sign in.'
+    : page.url.searchParams.get('message') === 'password_reset_success'
+    ? 'Password has been successfully reset.'
+    : ''
+);
 </script>
 
 <AuthForm
@@ -20,16 +22,32 @@
 	alternativeLink={{text: "sign up for a new account", href: "/sign-up"}}
 	bind:isSubmitting={isSubmitting}
 >
-	{#if successMessage}<div class="form-success">{successMessage}</div>{/if}
-  {#if form?.error}<div class="form-error">{form.error}</div>{/if}
+	{#if successMessage}
+		<div class="form-success">{successMessage}</div>
+	{/if}
 
-	<div class="form-group">
-		<label for="email">Email</label>
-		<input id="email" name="email" type="email" placeholder="Enter your email" required>
-	</div>
-	<div class="form-group">
-		<label for="password">Password</label>
-		<input id="password" name="password" type="password" placeholder="Enter your password" required>
-	</div>
+  {#if form?.error}
+		<div class="form-error">{form.error}</div>
+	{/if}
+
+	<Input id="email" name="email" type="email" label="Email" placeholder="Enter your email" required error={form?.errors?.email}/>
+	<Input id="password" name="password" type="password" label="Password" placeholder="Enter your password" required error={form?.errors?.password}/>
 	<a href="/users/forgot-password" class="forgot-link">Forgot password?</a>
 </AuthForm>
+
+<style>
+	.form-error {
+		color: #e74c3c;
+		background-color: #fdecea;
+		padding: 0.75rem;
+		border-radius: 4px;
+		margin-bottom: 1rem;
+		text-align: center;
+		border-left: 4px solid #e74c3c;
+		font-weight: 600;
+	}
+
+	.forgot-link {
+		text-align: end;
+	}
+</style>

@@ -50,6 +50,9 @@
 		<div class="other">
 			{#if user}
 				<ToggleTheme/>
+				{#if user.role === "admin"}
+				<a href="/admin" data-sveltekit-preload-data="false">Admin Panel</a>
+				{/if}
 				<div class="profile-menu-container">
 					<Avatar src={user.image} name={user.name} size={36} onclick={toggleDropdown}/>
 				{#if isDropdownOpen}
@@ -70,6 +73,7 @@
 				{/if}
 			</div>
 			{:else}
+				<ToggleTheme/>
 				<Button href="/sign-in" variant="secondary">Sign in</Button>
 				<Button href="/sign-up" variant="primary">Get started</Button>
 			{/if}
