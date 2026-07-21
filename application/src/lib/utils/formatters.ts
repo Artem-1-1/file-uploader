@@ -18,6 +18,24 @@ export function formatSize(bytes: number) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
+export function formatBanStatus(isBanned: boolean | null | undefined): string {
+  return isBanned ? "Banned" : "Not banned";
+}
+
+export function formatBanReason(reason: string | null | undefined): string {
+  if (!reason || reason.trim() === "") return "--";
+  return reason;
+}
+
+export function formatBanExpires(
+  date: Date | string | null | undefined,
+  isBanned: boolean | null | undefined
+): string {
+  if (!isBanned) return "--";
+  if (!date) return "Permanently";
+  return formatDate(date) 
+}
+
 interface FileTypeConfig {
   label: string;
   icon: string;

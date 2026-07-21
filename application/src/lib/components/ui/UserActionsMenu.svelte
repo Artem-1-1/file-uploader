@@ -3,20 +3,22 @@
     userId: string,
     userRole: string,
     isBanned?: boolean,
+    onChangeRole?: (id: string) => void;
+    onStorageUpdate?: (id: string) => void;
     onBan? : (id: string) => void;
     onUnban?: (id: string) => void;
     onDelete?: (id: string) => void;
-    onChangeRole?: (id: string) => void;
+
   }
 
   let {
     userId,
-    userRole,
     isBanned = false,
+    onChangeRole,
+    onStorageUpdate,
     onBan,
     onUnban,
     onDelete,
-    onChangeRole,
   } : Props = $props();
 
   let isOpen = $state(false);
@@ -59,6 +61,13 @@
         </button>
       {/if}
 
+      {#if onStorageUpdate}
+        <button type="button" onclick={() => { onStorageUpdate(userId); closeMenu(); }}>
+          <img src="/images/storage.svg" alt="update storage" class="icon" />
+          Storage Update
+        </button>
+      {/if}
+
       {#if isBanned && onUnban}
         <button type="button" onclick={() => { onUnban(userId); closeMenu(); }}>
           <img src="/images/user-unban.svg" alt="Unban" class="icon" />
@@ -82,9 +91,11 @@
 </div>
 
 <style>
-  .menu-container {
+.menu-container {
+  display: flex;
   position: relative;
   display: inline-block;
+  width: 100%;
 }
 
 .action-menu-btn {
@@ -96,6 +107,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 auto;
 }
 
 .action-menu-btn:hover {
@@ -103,47 +115,47 @@
 }
 
 .dropdown-menu {
-  position: absolute;
-  right: 0;
-  top: 100%;
-  z-index: 50;
-  min-width: 160px;
-  background-color: var(--dropdown-bg);
-  border: 1px solid var(--dropdown-border);
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 50;
+    min-width: 160px;
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--dropdown-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
 
-.dropdown-menu button {
-  width: 100%;
-  padding: 8px 12px;
-  text-align: left;
-  background: none;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--dropdown-text-main);
-  text-decoration: none;
-}
+  .dropdown-menu button {
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--dropdown-text-main);
+    text-decoration: none;
+  }
 
-.dropdown-menu button:hover {
-  background-color: var(--dropdown-bg-hover);
-}
+  .dropdown-menu button:hover {
+    background-color: var(--dropdown-bg-hover);
+  }
 
-.icon {
-  width: 24px;
-  height: 24px;
-}
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
 
-.icon { 
-  filter: var(--svg-invert); 
-}
+  .icon { 
+    filter: var(--svg-invert); 
+  }
 </style>

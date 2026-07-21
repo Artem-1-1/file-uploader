@@ -3,6 +3,7 @@
 	import Button from "../ui/Button.svelte";
 	import { authClient } from "$lib/auth-client";
 	import { goto, invalidateAll } from "$app/navigation";
+	import { page } from "$app/stores";
 	import "$lib/styles/global.css"
   import Avatar from "../ui/Avatar.svelte";
 
@@ -50,9 +51,11 @@
 		<div class="other">
 			{#if user}
 				<ToggleTheme/>
-				{#if user.role === "admin"}
-				<a href="/admin" data-sveltekit-preload-data="false">Admin Panel</a>
-				{/if}
+				{#if $page.url.pathname === '/admin'}
+          <a href="/home" data-sveltekit-preload-data="false">Home</a>
+        {:else if user.role === "admin"}
+          <a href="/admin" data-sveltekit-preload-data="false">Admin Panel</a>
+        {/if}
 				<div class="profile-menu-container">
 					<Avatar src={user.image} name={user.name} size={36} onclick={toggleDropdown}/>
 				{#if isDropdownOpen}
