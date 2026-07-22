@@ -69,9 +69,9 @@ import { page } from '$app/stores';
 <style>
   .sidebar {
     grid-column: 3;
-    background: var(--dropdown-bg);
+    background: var(--bg-color);
     width: 100%;
-    border-left: 1px solid var(--dropdown-border);
+    border-left: 1px solid var(--border-color);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -82,7 +82,7 @@ import { page } from '$app/stores';
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    border-bottom: 1px solid var(--dropdown-border);
+    border-bottom: 1px solid var(--border-color);
   }
 
   .sidebar-header h2 {
@@ -102,7 +102,7 @@ import { page } from '$app/stores';
   }
 
   .close-btn:hover {
-    background: var(--dropdown-bg-hover);
+    background: var(--bg-elevated);
   }
 
   .close-btn .icon {

@@ -58,6 +58,6 @@
     width: 100%;
     height: 100%;
     user-select: none;
-    color: white;
+    color: var(--text-color);
   }
 </style>

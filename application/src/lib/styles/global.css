@@ -1,23 +1,21 @@
 :root {
-	--auth-bg: #ffffff;
-	--light-green: #21A0A0;
-	--light-green-hover: #1B8585;
-	--border-color: #dadce0;
-	--text-color: oklch(37.3% 0.034 259.733);
-	--dropdown-bg: #ffffff;
-	--dropdown-border: var(--border-color);
-	--dropdown-text-main: var(--text-color);
-	--text-dropdown-muted: oklch(60% 0.02 259.733);
-	--hr-dropdown: var(--border-color);
-	--shadow-dropdown: rgba(0, 0, 0, 0.2);
-	--link-color: #3333FF;
-	--placeholder-color: #757575;
-	--input-bg: #ffffff;
-	--input-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-	--input-focus-border: #3333FF;
-	--input-focus-shadow: rgba(79, 70, 229, 0.15);
-	--error-color: #ef4444;
-	--error-shadow: rgba(239, 239, 239, 0.15);
+  --light-green: #21A0A0;
+  --light-green-hover: #1B8585;
+  --border-color: #dadce0;
+  --text-color: oklch(37.3% 0.034 259.733);
+  --text-muted: oklch(60% 0.02 259.733);
+  --bg-color: #ffffff;
+  --bg-elevated: #f0f0f0;          
+  --input-bg: #ffffff;
+  --link-color: #3333FF;
+  --link-hover-color: #0000CC;
+  --placeholder-color: #757575;
+  --error-color: #ef4444;
+  --shadow: rgba(0, 0, 0, 0.2);
+  --input-focus-border: #3333FF;
+  --input-focus-shadow: rgba(79, 70, 229, 0.15);
+  --input-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --svg-invert: invert(0);
 }
 
 * {
@@ -28,31 +26,26 @@
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	line-height: 1.5;
-	color: var(--text-color);
+	background-color: var(--bg-color);
+  	color: var(--text-color);
 	transition: background-color 0.3s ease, color 0.3s ease;
+	overflow: hidden;
 }
 
 body.dark-mode {
-	background-color: oklch(21% 0.034 264.665);
-	color: oklch(92.8% 0.006 264.531);
-	--text-color: oklch(92.8% 0.006 264.531);
-	--dropdown-bg: oklch(28% 0.034 264.665);  
-	--dropdown-border: oklch(35% 0.034 264.665);   
-	--dropdown-text-main: oklch(92.8% 0.006 264.531); 
-	--dropdown-text-muted: oklch(75% 0.015 264.531);
-	--dropdown-hr: oklch(35% 0.034 264.665);       
-	--shadow-dropdown: rgba(0, 0, 0, 0.5);
-	--dropdown-bg-hover: oklch(33% 0.034 264.665);
-	--svg-invert: invert(1);
-	--input-bg: oklch(25% 0.034 264.665);
-	--input-shadow: none;
-	--input-focus-border: oklch(60% 0.15 260);
-	--input-focus-shadow: rgba(147, 197, 253, 0.2); 
-	--error-color: oklch(65% 0.22 20);
-	--error-shadow: rgba(248, 113, 113, 0.2);
-	--link-color: oklch(75% 0.15 250);      
-	--link-hover-color: oklch(85% 0.1 250);
-	--placeholder-color: oklch(65% 0.02 264.531);
-	--auth-bg: oklch(25% 0.034 264.665); 
-	--shadow-dropdown: rgba(0, 0, 0, 0.4);
+  --bg-color: oklch(21% 0.034 264.665);
+  --bg-elevated: oklch(25% 0.034 264.665);
+  --border-color: oklch(35% 0.034 264.665);
+  --text-color: oklch(92.8% 0.006 264.531);
+  --text-muted: oklch(65% 0.02 264.531);
+  --input-bg: oklch(25% 0.034 264.665);
+  --link-color: oklch(75% 0.15 250);
+  --link-hover-color: oklch(85% 0.1 250);
+  --placeholder-color: oklch(65% 0.02 264.531);
+  --error-color: oklch(65% 0.22 20);
+  --shadow: rgba(0, 0, 0, 0.4);
+  --input-shadow: none;
+  --input-focus-border: oklch(60% 0.15 260);
+  --input-focus-shadow: rgba(147, 197, 253, 0.2);
+  --svg-invert: invert(1);
 }

@@ -58,8 +58,8 @@
 		max-width: 400px;
 		padding: 40px;
 		border-radius: 1rem;
-		background-color: var(--auth-bg);
-		box-shadow: 0 4px 20px var(--shadow-dropdown);
+		background-color: var(--bg-color);
+		box-shadow: 0 4px 20px var(--shadow);
 		flex-grow: 1;
 	}
 

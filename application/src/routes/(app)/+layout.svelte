@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Sidebar from "$lib/components/ui/Sidebar.svelte";
-  import FileSidebar from "$lib/components/ui/FileSidebar.svelte";
+  import Sidebar from "$lib/components/layout/Sidebar.svelte";
+  import FileSidebar from "$lib/components/files/FileSidebar.svelte";
   import { fileSidebarStore } from "$lib/stores/fileSidebar.svelte";
 
   let { children } = $props();
@@ -29,9 +29,10 @@
   .page-container {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
-    min-height: 100vh;
+    height: 100vh;
     box-sizing: border-box;
     transition: grid-template-columns 0.2s ease;
+    overflow: hidden;
   }
 
   .page-container.file-sidebar-open {
@@ -63,6 +64,6 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
   }
 </style>

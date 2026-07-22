@@ -4,7 +4,7 @@
   import "@uploadthing/svelte/styles.css"; 
   import type { PageData } from "./$types";
   import { invalidateAll } from "$app/navigation";
-  import FileTable from "$lib/components/ui/FileTable.svelte";
+  import FileTable from "$lib/components/files/FileTable.svelte";
   import { fileSidebarStore } from "$lib/stores/fileSidebar.svelte";
 
   let {data} : { data: PageData } = $props(); 

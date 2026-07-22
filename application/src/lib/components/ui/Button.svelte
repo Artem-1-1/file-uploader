@@ -91,7 +91,7 @@
 		border-radius: 0;
 		font-weight: bold;
 		color: var(--text-color);
-		border-bottom: 1px solid #7f7f7f;
+		border-bottom: 1px solid var(--placeholder-color);
 		padding-bottom: 2px;
 		box-shadow: none;
 	}

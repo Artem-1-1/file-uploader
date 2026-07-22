@@ -1,6 +1,16 @@
 <script lang="ts">
   import { page } from "$app/state";
-  let { isSidebarOpen = $bindable(true), onToggle } = $props();
+  import StorageIndicator from "../ui/StorageIndicator.svelte";
+
+  interface Props {
+    isSidebarOpen?: boolean;
+    onToggle: () => void;
+  }
+
+  let { 
+    isSidebarOpen = $bindable(true), 
+    onToggle,
+  }: Props = $props();
 </script>
 
 <aside class="sidebar" class:collapsed={!isSidebarOpen}>
@@ -28,18 +38,24 @@
       {/if}
     </a>
   </nav>
+    <div class="sidebar-bottom">
+      <StorageIndicator/>
+    </div>
 </aside>
 
 <style>
   .sidebar {
-    background-color: var(--dropdown-bg);
+    background-color: var(--bg-color);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     transition: all 0.2s ease;
-    height: 100%;
+    height: calc(100vh - 60px);
+    max-height: 100vh; 
     width: 260px;
+    flex-shrink: 0;
+    box-sizing: border-box;
   }
 
   .sidebar.collapsed {
@@ -51,6 +67,7 @@
     display: flex;
     justify-content: flex-end; 
     padding: 0.75rem 1rem 0 1rem;
+    flex-shrink: 0;
   }
 
   .sidebar.collapsed {
@@ -75,7 +92,7 @@
 
   .toggle-btn:hover,
   .nav-link:hover {
-    background-color: var(--dropdown-bg-hover);
+    background-color: var(--bg-elevated);
   }
 
   .sidebar-nav {
@@ -83,6 +100,9 @@
     flex-direction: column;
     gap: 4px;
     padding: 0.5rem;
+    flex-grow: 1; 
+    overflow-y: auto;
+    min-height: 0; 
   }
 
   .sidebar.collapsed .sidebar-nav {
@@ -101,6 +121,7 @@
     border-radius: 6px;
     font-weight: 600;
     transition: background-color 0.15s, color 0.15s, opacity 0.15s;
+    flex-shrink: 0;
   }
 
   .nav-link.active {
@@ -120,5 +141,29 @@
     width: 24px;
     height: 24px;
     filter: var(--svg-invert);
+    flex-shrink: 0;
+  }
+
+  .sidebar-bottom {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+    flex-shrink: 0;
+    width: 100%;             
+    box-sizing: border-box;
+    opacity: 1;
+    max-height: 150px;
+    overflow: hidden;
+    transition: opacity 0.2s ease, max-height 0.2s ease, padding 0.2s ease;
+  }
+
+  .sidebar.collapsed .sidebar-bottom {
+    display: none;
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-color: transparent;
+    pointer-events: none;
+    width: 64px; 
   }
 </style>

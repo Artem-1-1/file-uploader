@@ -34,6 +34,6 @@
 	}
 
 	:global(body.dark-mode) button:hover {
-    background-color: var(--dropdown-bg-hover);
+    background-color: var(--bg-elevated);
   }
 </style>

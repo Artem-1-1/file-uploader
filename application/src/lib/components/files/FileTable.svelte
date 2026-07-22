@@ -1,7 +1,7 @@
 <script lang="ts">
   import { formatDate, formatSize, formatFileType, getFileIcon } from "$lib/utils/formatters";
   import FileActionsMenu from "./FileActionsMenu.svelte";
-  import Modal from "./Modal.svelte";
+  import Modal from "../ui/Modal.svelte";
 
   interface FileItem {
     id: string;

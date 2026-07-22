@@ -111,7 +111,7 @@
 }
 
 .action-menu-btn:hover {
-  background-color: var(--dropdown-border);
+  background-color: var(--border-color);
 }
 
 .dropdown-menu {
@@ -120,8 +120,8 @@
     top: 100%;
     z-index: 50;
     min-width: 160px;
-    background-color: var(--dropdown-bg);
-    border: 1px solid var(--dropdown-border);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     padding: 4px;
@@ -142,12 +142,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--dropdown-text-main);
+    color: var(--text-color);
     text-decoration: none;
   }
 
   .dropdown-menu button:hover {
-    background-color: var(--dropdown-bg-hover);
+    background-color: var(--bg-elevated);
   }
 
   .icon {

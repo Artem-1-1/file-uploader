@@ -87,6 +87,9 @@
 <style>
 	header {
 		padding: 10px 20px;
+		height: 60px;
+    box-sizing: border-box;
+		background-color: var(--bg-color);
 	}
 
 	nav {
@@ -120,22 +123,17 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    background-color: var(--dropdown-bg);
-    border: 1px solid var(--dropdown-border);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    box-shadow: 0 4px 16px var(--shadow-dropdown);
-		color: var(--text-dropdown-main);
+    box-shadow: 0 4px 16px var(--shadow);
+		color: var(--text-color);
     padding: 12px;
     min-width: 200px;
     z-index: 50;
     display: flex;
     flex-direction: column;
     gap: 8px;
-
-		background-color: var(--dropdown-bg);
-		border: 1px solid var(--dropdown-border);
-		box-shadow: 0 4px 16px var(--shadow-dropdown);
-		color: var(--dropdown-text-main);
 		transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   }
 
@@ -148,17 +146,17 @@
 
 	.username {
     font-weight: 600;
-		color: var(--dropdown-text-main);
+		color: var(--text-color);
   }
 	
 	.user-email {
     font-size: 14px;
-    color: var(--dropdown-text-muted);
+    color: var(--text-muted);
   }
 
 	hr {
     border: 0;
-    border-top: 1px solid var(--dropdown-hr);
+    border-top: 1px solid var(--border-color);
     margin: 4px 0;
   }
 </style>

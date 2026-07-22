@@ -39,12 +39,12 @@
   }
 
   .modal-content {
-    background-color: var(--dropdown-bg);
-    border: 1px solid var(--dropdown-border);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
     padding: 2rem;
     border-radius: 12px;
     width: 400px;
-    box-shadow: 0 10px 25px -5px var(--shadow-dropdown), 0 8px 10px -6px var(--shadow-dropdown);
+    box-shadow: 0 10px 25px -5px var(--shadow), 0 8px 10px -6px var(--shadow);
     position: relative;
     box-sizing: border-box;
     display: flex;
@@ -75,7 +75,7 @@
   }
 
   .modal-close-btn:hover {
-    background-color: var(--dropdown-bg-hover);
+    background-color: var(--bg-elevated);
   }
 
   .modal-body {
