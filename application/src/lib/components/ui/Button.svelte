@@ -46,14 +46,15 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 12px 16px;
+		padding: 8px 16px;
 		border: none;
 		border-radius: 8px;
-		font-size: 16px;
-		font-weight: bold;
+		font-size: 14px;
+		font-weight: 500;
 		text-decoration: none;
 		cursor: pointer;
 		transition: all 0.3s ease;
+		gap: 0.5rem;
 	}
 
 	.btn:disabled, 
@@ -64,9 +65,11 @@
 	}
 
 	.btn-primary {
+		padding: 12px 16px;
 		background-color: var(--light-green, #21a0a0);
 		color: white;
 		box-shadow: 0 4px 6px rgba(33, 160, 160, 0.3);
+		font-weight: bold;
 	}
 
 	.btn-primary:hover:not(:disabled):not([aria-disabled="true"]) {
@@ -75,14 +78,23 @@
 	}
 
 	.btn-secondary {
+		padding: 12px 16px;
 		background-color: transparent;
-		color: currentColor;
+		color: var(--text-color);
 		box-shadow: none;
 	}
 
+	:global(.btn-secondary):hover:not(:disabled):not([aria-disabled="true"]),
 	.btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) {
-		text-decoration: underline;
-		background-color: color-mix(in srgb, currentColor 8%, transparent);
+		text-decoration: none;
+		background-color: rgba(97, 99, 102, 0.2);
+	}
+
+	.btn-secondary :global(img) {
+		width: 24px;
+		height: 24px;
+		flex-shrink: 0;
+		filter: var(--svg-invert);
 	}
 
 	.btn-text {

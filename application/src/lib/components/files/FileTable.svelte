@@ -20,6 +20,7 @@
     onRename?: (id: string, newName: string) => void;
     onRestore?: (id: string) => void;
     onDelete?: (id: string) => void;
+    onOpen?: (id: string) => void;
   }
 
   let {
@@ -29,7 +30,8 @@
     onInfo,
     onRename,
     onRestore, 
-    onDelete
+    onDelete,
+    onOpen
   }: Props = $props();
 
   let isRenameModalOpen = $state(false);
@@ -57,6 +59,12 @@
     activeFileId = "";
     newFileName = "";
   }
+
+  function handleOpen(file: FileItem) {
+    if (file.type === 'folder' && onOpen) {
+      onOpen(file.id);
+    }
+  }
 </script>
 
 <div class="file-table">
@@ -71,7 +79,18 @@
 
     <div class="table-body">
       {#each files as file}
-        <div class="table-row">
+        <div 
+          class="table-row"
+          role="button"
+          tabindex="0" 
+          ondblclick={() => handleOpen(file)}
+          onkeydown={(e) => {
+          if (e.key === 'Enter') {
+              e.preventDefault();
+              handleOpen(file);
+            }
+          }}
+          style:cursor={file.type === 'folder' ? 'pointer' : 'default'}>
           <div class="file-info">
             <img src={getFileIcon(file.type, file.mimeType)} alt="file icon" class="icon">
             <div class="file-name">{file.name}</div>
@@ -82,6 +101,7 @@
           <div class="col-actions">
             <FileActionsMenu
               fileId={file.id}
+              fileType={file.type}
               {isDeletedView}
               {canDownload}
               {onInfo}

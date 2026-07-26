@@ -50,6 +50,16 @@ export const GET: RequestHandler = async({ url, locals}) => {
     })
   } catch (error) {
     console.error("API Get Download Error: ", error);
+
+    if (error instanceof Error && error.message.includes("Cannot download a folder")) {
+      return new Response(
+        JSON.stringify({ error: "Unable to download the folder directly. Download files individually." }), 
+        { 
+          status: 400, 
+          headers: { "Content-Type": "application/json" } 
+        }
+      );
+    }
     return handleServerError(error, "Get Download");
   }
 }

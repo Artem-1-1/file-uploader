@@ -3,16 +3,22 @@
   import { UploadDropzone, UploadButton } from "@uploadthing/svelte";
   import "@uploadthing/svelte/styles.css"; 
   import type { PageData } from "./$types";
-  import { invalidateAll } from "$app/navigation";
+  import { invalidateAll, goto } from "$app/navigation";
   import FileTable from "$lib/components/files/FileTable.svelte";
   import { fileSidebarStore } from "$lib/stores/fileSidebar.svelte";
+  import Modal from "$lib/components/ui/Modal.svelte";
+  import Input from "$lib/components/ui/Input.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import { enhance } from "$app/forms";
 
-  let {data} : { data: PageData } = $props(); 
+  let { data, form } : { data: PageData, form?: any } = $props(); 
   
   const currentParentId = $derived(data.parentId || null);
 
   let isDragging = $state(false);
   let dragCounter = 0;
+
+  let isModalOpen = $state(false);
 
   const uploader = createUploader("fileUploader", {
     input: {
@@ -99,15 +105,61 @@
       console.log(`Error deleting file: ${error.message}`);
     }
   }
+
+  function openCreateFolderModal() {
+    isModalOpen = true;
+  }
+
+  function closeModal() {
+    isModalOpen = false;
+  }
+
+  function handleOpenFolder(folderId: string) {
+    goto(`?parentId=${folderId}`, { keepFocus: true });
+  }
+
+  function goBack() {
+    if (data.backToId) {
+      goto(`?parentId=${data.backToId}`)
+    } else {
+      goto('?')
+    }
+  }
 </script>
 
 <div class="page-header">
   <div class="action-buttons">
-  <div class="upload-button-wrapper">
-    <UploadButton {uploader} appearance={{allowedContent: "display: none;"}}/>
+    {#if currentParentId}
+      <Button variant="secondary" onclick={goBack}>
+        <img src="/images/arrow-left.svg" alt="back" class="icon">
+        Back
+      </Button>
+    {/if}
+
+    <div class="upload-button-wrapper">
+      <UploadButton {uploader} appearance={{allowedContent: "display: none;"}}/>
+    </div>
+    <Button variant="secondary" onclick={openCreateFolderModal}>
+      <img src="/images/new-folder.svg" alt="new-folder icon">
+      New Folder
+    </Button>
   </div>
-  </div>
-  <h2>All files</h2>
+
+  {#if data.breadcrumbsPath && data.breadcrumbsPath.length > 0}
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a href="/home" class="crumb-link">Home</a>
+      {#each data.breadcrumbsPath as crumb, i}
+        <img src="/images/chevronright.svg" alt="" aria-hidden="true" class="chevron"/>
+        {#if i === data.breadcrumbsPath.length - 1}
+          <div class="current-crumb" aria-current="page">{crumb.name}</div>
+        {:else}
+          <a href="?parentId={crumb.id}" class="crumb-link">{crumb.name}</a>
+        {/if}
+      {/each}  
+    </nav>
+  {:else}  
+    <h2>All files</h2>
+  {/if}
 </div>
 
 <div 
@@ -131,8 +183,41 @@
     onInfo={handleInfo}
     onRename={handleRename}
     onDelete={handleSoftDelete}
+    onOpen={handleOpenFolder}
   />
 </div>
+
+<Modal title="Create New Folder" bind:isOpen={isModalOpen}>
+  <form 
+    method="POST"
+    action="?/createFolder"
+    use:enhance={() => {
+      return async ({ update }) => {
+        await update({ reset: true });
+        isModalOpen = false; 
+      };
+    }}>
+    <input type="hidden" name="parentId" value={currentParentId || ''} />
+
+    <Input
+      name="name"
+      value={form?.name ?? ''}
+      label="Folder Name"
+      placeholder="Enter folder name"
+      error={form?.error}
+      onkeydown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          (e.target as HTMLInputElement).closest('form')?.requestSubmit();
+        }
+      }}
+      />
+    <div class="modal-actions">
+      <Button variant="secondary" type="button" onclick={closeModal}>Cancel</Button>
+      <Button type="submit">Create</Button>
+    </div>
+  </form>
+</Modal>
 
 <style>
   .action-buttons {
@@ -159,5 +244,42 @@
     height: 100%;
     max-width: none;
     box-sizing: border-box;
+  }
+
+  .modal-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .breadcrumbs { 
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 14px;
+    color: var(--text-color);
+    margin-top: 0.5rem;
+  }
+
+  .crumb-link {
+    color: var(--text-color);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .crumb-link:hover {
+    text-decoration: underline;
+  }
+
+  .current-crumb {
+    font-weight: 600;
+  }
+
+  .chevron { 
+    width: 12px;
+    height: 12px;
+    filter: var(--svg-invert);
   }
 </style>

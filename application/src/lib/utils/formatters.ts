@@ -11,9 +11,9 @@ export function formatDate(dateString: string | Date) {
 }
 
 export function formatSize(bytes: number) {
-  if (bytes === 0) return "--";
+  if (bytes === 0) return "0 Byte";
   const k = 1024;
-  const sizes = ["Byte", "KB", "MB", "GB"];
+  const sizes = ["Byte", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }

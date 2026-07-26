@@ -1,28 +1,66 @@
-import { eq, and, isNull, isNotNull, inArray, desc, sql } from "drizzle-orm";
+import { eq, and, isNull, isNotNull, inArray, desc, sql, type SQL, type InferSelectModel } from "drizzle-orm";
 import { db } from "$lib/server/db";
 import { file } from "../db/schema";
 import { utapi } from "../uploadthing";
 
-export async function getUserFiles(userId: string) {
+export async function getUserFiles(userId: string, parentId: string | null = null) {
+  const conditions: SQL[] = [
+    eq(file.userId, userId),
+    isNull(file.deletedAt)
+  ];
+
+  if (parentId) {
+    conditions.push(eq(file.parentId, parentId));
+  } else {
+    conditions.push(isNull(file.parentId));
+  }
+
   return await db
     .select({
       id: file.id,
       name: file.name,
       type: file.type,
-      size: file.size,
       mimeType: file.mimeType,
       path: file.storagePath,
       createdAt: file.createdAt,
       updatedAt: file.updatedAt,
+      size: sql<number>`
+        CASE 
+          WHEN ${file.type} = 'folder' THEN get_folder_size(${file.id}::text)
+          ELSE ${file.size}
+        END
+      `.mapWith(Number),
     })
     .from(file)
-    .where(
-      and(
-        eq(file.userId, userId),
-        isNull(file.deletedAt)
-      )
-    )
+    .where(and(...conditions))
     .orderBy(desc(file.createdAt));
+}
+
+type FolderPathItem = Pick<InferSelectModel<typeof file>, 'id' | 'name' | 'parentId'>;
+
+export async function getFolderPath(folderId: string, userId: string) {
+  const path: FolderPathItem[] = [];
+  let currentId: string | null = folderId;
+
+  let depth = 0;
+  const MAX_DEPTH = 20;
+  
+  while(currentId && depth < MAX_DEPTH) {
+    const folder: FolderPathItem | undefined = await db.query.file.findFirst({
+      where: and(
+        eq(file.id, currentId),
+        eq(file.userId, userId)
+      ),
+      columns: {id: true, name: true, parentId: true }
+    });
+
+    if (!folder) break;
+
+    path.unshift({ id: folder.id, name: folder.name, parentId: folder.parentId});
+    currentId = folder.parentId;
+    depth++;
+  }
+  return path;
 }
 
 export async function renameUserFile(userId: string, fileId: string, newName: string) {

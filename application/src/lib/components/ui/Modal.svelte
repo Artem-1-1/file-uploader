@@ -1,11 +1,38 @@
-<script>
-  let { title, onConfirm, onCancel, children, isOpen = $bindable(false) } = $props();
+<script lang="ts">
+  import type { Snippet } from 'svelte';
+
+  interface Props {
+    title: string;
+    onConfirm?: () => void; 
+    onCancel?: () => void;
+    children: Snippet;
+    isOpen?: boolean;
+    confirmText?: string;
+    cancelText?: string;
+  }
+
+  let { 
+    title, 
+    children, 
+    isOpen = $bindable(false),
+    onConfirm,
+    onCancel,
+    confirmText = 'Confirm',
+    cancelText = 'Cancel'
+  }: Props = $props();
+
+  function handleClose() {
+    if (onCancel) {
+      onCancel();
+    }
+    isOpen = false;
+  }
 </script>
 
 {#if isOpen}
-  <div class="modal-overlay" onclick={onCancel} role="presentation">
+  <div class="modal-overlay" onclick={handleClose} role="presentation">
     <div class="modal-content" onclick={(e) => e.stopPropagation()} role="presentation">
-      <button class="modal-close-btn" onclick={onCancel} aria-label="Close modal">
+      <button class="modal-close-btn" onclick={handleClose} aria-label="Close modal">
         <img src="/images/close.svg" alt="close icon" class="icon">
       </button>
 
@@ -15,10 +42,16 @@
         {@render children()}
       </div>
 
-      <div class="modal-actions">
-        <button onclick={onCancel}>Cancel</button>
-        <button onclick={onConfirm}>Confirm</button>
-      </div>
+      {#if onConfirm || onCancel}
+        <div class="modal-actions">
+          {#if onCancel}
+            <button onclick={handleClose}>{cancelText}</button>
+          {/if}
+          {#if onConfirm}
+            <button onclick={onConfirm}>{confirmText}</button>
+          {/if}
+        </div>
+      {/if}
     </div>
   </div>
 {/if}

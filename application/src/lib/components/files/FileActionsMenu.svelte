@@ -1,6 +1,7 @@
 <script lang="ts">
   interface Props {
     fileId: string;
+    fileType: string,
     isDeletedView?: boolean;
     canDownload?: boolean;
     onInfo?: (id: string) => void;
@@ -11,6 +12,7 @@
 
   let {
     fileId,
+    fileType,
     isDeletedView = false,
     canDownload = false,
     onInfo,
@@ -56,7 +58,7 @@
       }}
       >
       {#if !isDeletedView}
-        {#if canDownload}
+        {#if canDownload && fileType !== 'folder'}
           <a 
             href={`/api/files?fileId=${fileId}`} 
             download
