@@ -82,6 +82,7 @@
 		background-color: transparent;
 		color: var(--text-color);
 		box-shadow: none;
+		font-weight: 600;
 	}
 
 	:global(.btn-secondary):hover:not(:disabled):not([aria-disabled="true"]),

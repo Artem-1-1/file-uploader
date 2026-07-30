@@ -5,6 +5,7 @@ import { svelteKitHandler } from 'better-auth/svelte-kit';
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
+	const theme = event.cookies.get('theme') || 'light';
 
 	if (session) {
 		event.locals.session = session.session;
@@ -36,7 +37,19 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 		throw redirect(303, '/sign-in');
 	}
 
-	return svelteKitHandler({ event, resolve, auth, building });
+	return svelteKitHandler({ 
+    event, 
+    resolve: (evt) => resolve(evt, {
+        transformPageChunk: ({ html }) => {
+          const themeClass = theme === 'dark' ? 'dark-mode' : '';
+          return html
+            .replace('<html', `<html class="${themeClass}"`)
+            .replace('<body', `<body class="${themeClass}"`);
+        }
+    }), 
+    auth, 
+    building 
+});
 };
 
 export const handle: Handle = handleBetterAuth;

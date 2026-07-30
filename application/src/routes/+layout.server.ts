@@ -1,9 +1,14 @@
 import type { LayoutServerLoad } from "./$types";
 import { getUserById } from "$lib/server/users";
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ cookies, locals }) => {
+  const currentTheme = cookies.get('theme') || 'light';
+
   if (!locals.user?.id) {
-    return { user: null };
+    return { 
+      user: null,
+      theme: currentTheme
+     };
   }
 
   const freshUser = await getUserById(locals.user.id);
@@ -17,6 +22,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
       role: freshUser.role,
       storageUsed: freshUser.storageUsed,
       storageLimit: freshUser.storageLimit,
-    } : null
+    } : null,
+    theme: currentTheme
   };
 };

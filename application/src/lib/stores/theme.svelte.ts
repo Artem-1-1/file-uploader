@@ -2,7 +2,8 @@ import { browser } from '$app/environment';
 
 const getInitialTheme = () => {
   if (browser) {
-    return document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    const match = document.cookie.match(/(?:^|; )theme=([^;]*)/);
+    return match ? match[1] : 'light';
   }
   return 'light';
 };
@@ -18,8 +19,10 @@ export function toggleTheme() {
   if (browser) {
     if (newTheme === 'dark') {
       document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark-mode');
     } else {
       document.body.classList.remove('dark-mode');
+      document.documentElement.classList.remove('dark-mode');
     }
     
     const maxAge = 365 * 24 * 60 * 60;

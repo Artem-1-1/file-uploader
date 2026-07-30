@@ -1,16 +1,14 @@
 <script lang="ts">
   import ToggleTheme from "./ToggleTheme.svelte";
 	import Button from "../ui/Button.svelte";
-	import { authClient } from "$lib/auth-client";
-	import { goto, invalidateAll } from "$app/navigation";
+	import { enhance } from "$app/forms";
 	import { page } from "$app/stores";
 	import "$lib/styles/global.css"
   import Avatar from "../ui/Avatar.svelte";
 
-	let { user } = $props<{ user: any }>();
+	let { user }: { user: any } = $props();
 
 	let isLogOut = $state(false);
-
 	let isDropdownOpen = $state(false);
 
 	const toggleDropdown = (e: MouseEvent) => {
@@ -20,24 +18,6 @@
 
 	const closeDropdown = () => {
 		isDropdownOpen = false;
-	}
-
-	async function handleLogOut() {
-		isLogOut = true;
-		try {
-			await authClient.signOut({
-				fetchOptions: {
-					onSuccess: async () => {
-						await invalidateAll();
-						await goto("/")
-					}
-				}
-			});
-		} catch (error) {
-			console.error("Unexpected error during logout:", error);
-		} finally {
-			isLogOut = false;
-		}
 	}
 </script>
 
@@ -69,14 +49,35 @@
 					</div>
 					<hr />
 					<a href="/account">Settings</a>
-					<Button variant="primary" class="logout-button" onclick={handleLogOut} disabled={isLogOut}>
-						{isLogOut ? "Logging out..." : "Log Out"}
-					</Button>
+					<form action="/logout" method="POST" 
+						use:enhance={() => {
+							isLogOut = true;
+							return async ({ update }) => {
+								try {
+									await update();
+								} finally {
+									isLogOut = false;
+								}
+							}; 
+						}}>
+					<div class="logout-btn-wrapper">
+						<Button 
+							type="submit" 
+							variant="primary"
+							class="logout-btn" 
+							disabled={isLogOut}>
+							{#if isLogOut}
+								<span class="loading-spinner"></span> Log out...
+							{:else}
+								Log Out
+							{/if}
+						</Button>
+					</div>
+				</form>
 				</div>
 				{/if}
 			</div>
 			{:else}
-				<ToggleTheme/>
 				<Button href="/sign-in" variant="secondary">Sign in</Button>
 				<Button href="/sign-up" variant="primary">Get started</Button>
 			{/if}
@@ -86,16 +87,18 @@
 
 <style>
 	header {
-		padding: 10px 20px;
+		box-sizing: border-box;
 		height: 60px;
-    box-sizing: border-box;
-		background-color: var(--bg-color);
+		padding: 10px 20px;
+		background: var(--bg-color, transparent);
+		transition: background-color 0.3s ease;  
 	}
 
 	nav {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		background: transparent;
 	}
 
 	nav a{
@@ -113,6 +116,21 @@
 		align-items: center;
 		gap: 1rem;
 	}
+
+	.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 
 	.profile-menu-container {
     position: relative;
@@ -140,8 +158,8 @@
 	.user-info {
     display: flex;
     flex-direction: column;
-		gap: 5px;
-    font-size: 14px;
+		gap: 4px;
+    padding: 4px 8px;
   }
 
 	.username {

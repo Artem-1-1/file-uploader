@@ -24,53 +24,95 @@
 	}: AuthFormProps = $props();
 </script>
 
-<div class="page-container">
-	<main class="auth-main">
+	<div class="auth-main">
+	<header class="auth-header">
 		<h1>{title}</h1>
-		{#if description}
-      <p class="description">{description}</p>
-    {/if}
+			{#if description}
+      	<p class="description">{description}</p>
+    	{/if}
+	</header>
 
-		{#if alternativeLink}
-      <p>Or <a href={alternativeLink.href}>{alternativeLink.text}</a></p>
-    {/if}
-
-		<form class="auth-form" method="POST" {action} 
-			use:enhance={() => {
-				isSubmitting= true;
-				return async ({ update }) => {
-					try {
-						await update();
-					} finally {
-						isSubmitting = false;
-					}
+	<form class="auth-form" method="POST" {action} 
+		use:enhance={() => {
+			isSubmitting= true;
+			return async ({ update }) => {
+				try {
+					await update();
+				} finally {
+					isSubmitting = false;
 				}
-			}}>
-			{@render children()}
-			<Button type="submit" variant="primary" class="primary auth-submit" disabled={isSubmitting}>{submitText}</Button>
-		</form>
-	</main>
+			}
+		}}>
+		{@render children()}
+		<Button type="submit" variant="primary" class="primary auth-submit" disabled={isSubmitting}>
+			{#if isSubmitting}
+				<span class="loading">...Processing</span>
+			{:else}	
+				{submitText}
+			{/if}
+		</Button>
+	</form>
+
+	{#if alternativeLink}
+		<footer class="auth-footer">
+      <p>Or <a href={alternativeLink.href}>{alternativeLink.text}</a></p>
+		</footer>	
+  {/if}
 </div>
 
 <style>
 	.auth-main {
-		margin: 0 auto;
-		max-width: 400px;
-		padding: 40px;
-		border-radius: 1rem;
+		width: 100%;
+		max-width: 100%;
+		padding: 1.5rem;
+		border-radius: 0.75rem;
 		background-color: var(--bg-color);
 		box-shadow: 0 4px 20px var(--shadow);
-		flex-grow: 1;
+	}
+
+	.auth-header {
+		margin-bottom: 1.5rem;
+	}
+
+	@media (min-width: 640px) {
+		.auth-main {
+			max-width: 400px; 
+			padding: 2.5rem;
+			border-radius: 1rem;
+		}
 	}
 
 	.auth-main h1 {
 		text-align: center;
 		color: var(--light-green);
+		font-size: 1.5rem;
+		margin-bottom: 0.5rem;
+		word-wrap: break-word;
+	}
+
+	@media (min-width: 640px) {
+		.auth-main h1 {
+			font-size: 2rem;
+		}
 	}
 
 	.auth-main p {
 		text-align: center;
-		margin-bottom: 2rem;
+		margin-bottom: 1.5rem;
+		font-size: 0.9rem;
+		word-wrap: break-word;
+	}
+
+	@media (min-width: 640px) {
+		.auth-main p {
+			font-size: 1rem;
+			margin-bottom: 2rem;
+		}
+	}
+
+	.description {
+		color: var(--text-muted);
+		margin-bottom: 1rem;
 	}
 
 	.auth-form {
@@ -92,7 +134,33 @@
 	}
 
 	:global(.auth-submit) {
-		margin-top: 1rem; 
+		margin-top: 0.5rem; 
 		width: 100%;
+	}
+
+	.auth-footer { 
+		margin-top: 1.5rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.loading { 
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.loading::before {
+		content: '';
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid currentColor;
+		border-right-color: transparent;
+		border-radius: 50%;
+		animation: spin 0.6s linear infinite;
+	}
+
+	@keyframes spin {
+		to { transform: rotate(360deg); }
 	}
 </style>
